@@ -43,21 +43,21 @@ const createCustomField = {
 	model: "Task",
 	field: [
 		{
-			"description": "this is a test",
-			"asArray": false,
-			"visibility": ["admin", "api", "worker"],
-			"editability": ["admin", "api"],
-			"key": "test",
-			"name": "test",
-			"type": "single_line_text_field",
-			"contexts": [
+			description: "this is a test",
+			asArray: false,
+			visibility: ["admin", "api", "worker"],
+			editability: ["admin", "api"],
+			key: "test",
+			name: "test",
+			type: "single_line_text_field",
+			contexts: [
 				{
-					"isRequired": false,
-					"conditions": [],
-					"name": "save",
+					isRequired: false,
+					conditions: [],
+					name: "save",
 				},
 			],
-			"value": "order 123",
+			value: "order 123",
 		},
 	],
 	integration: "shopify",
