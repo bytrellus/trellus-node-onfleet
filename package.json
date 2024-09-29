@@ -4,8 +4,6 @@
 	"description": "Trellus Fork of Onfleet's Node.js API Wrapper Package",
 	"main": "index.js",
 	"scripts": {
-		"lint": "eslint --ext .js ./",
-		"lint-fix": "eslint --fix --ext .js ./",
 		"test": "mocha"
 	},
 	"repository": {
