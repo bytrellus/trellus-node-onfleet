@@ -1,2 +1,3 @@
-import onfleet from './lib/onfleet.js';
-export default onfleet;
+import Onfleet from "./lib/onfleet.js";
+
+export default Onfleet;
