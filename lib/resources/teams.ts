@@ -1,5 +1,6 @@
 import Resource, { Api } from "../resource";
 import { Location } from "./destinations";
+import type { OnfleetTask } from "./tasks";
 
 /**
  * Representation of an Onfleet Team
@@ -35,7 +36,7 @@ export interface UpdateTeamProps {
 }
 
 /**
- * Options for auto‐dispatching a team
+ * Options for auto-dispatching a team
  */
 export interface AutoDispatchTeamProps {
 	maxAllowedDelay?: number;
@@ -47,7 +48,7 @@ export interface AutoDispatchTeamProps {
 }
 
 /**
- * Result of an auto‐dispatch operation
+ * Result of an auto-dispatch operation
  */
 export interface AutoDispatchTeamResult {
 	dispatchId: string;
@@ -86,30 +87,32 @@ export interface GetWorkerEtaResult {
 }
 
 /**
- * Payload for inserting tasks into a team container
+ * Payload for inserting tasks into a team's container
  */
 export interface InsertTaskProps {
 	tasks: string[];
 }
 
 /**
- * Query parameters for listing tasks in a container
+ * Query parameters for listing unassigned tasks in a team
  */
-export interface ContainerQueryParams {
-	since?: number;
-	until?: number;
-	count?: number;
+export interface TeamTasksQueryProps {
+	isPickupTask?: boolean;
+	to?: number;
+	from?: number;
+	lastId?: string;
 }
 
 /**
- * Result of listing tasks in a container
+ * Result for listing unassigned tasks in a team
  */
-export interface ContainerResult {
-	tasks: string[];
+export interface TeamTasksResult {
+	tasks: OnfleetTask[];
+	lastId?: string;
 }
 
 /**
- * Teams resource: CRUD, auto‐dispatch, ETA, and container operations
+ * Teams resource: CRUD, auto-dispatch, ETA, task insertion, and unassigned task listing
  */
 export default class Teams extends Resource {
 	/** Create a new team */
@@ -117,8 +120,8 @@ export default class Teams extends Resource {
 
 	/**
 	 * Retrieve one team by ID, or list all teams
-	 * - `teams.get("id")` → GET /teams/:teamId
-	 * - `teams.get()`    → GET /teams
+	 * - `get(id)` → GET /teams/:teamId
+	 * - `get()`    → GET /teams
 	 */
 	public get!: (id?: string) => Promise<OnfleetTeam | OnfleetTeam[]>;
 
@@ -128,20 +131,20 @@ export default class Teams extends Resource {
 	/** Delete a team by ID */
 	public deleteOne!: (id: string) => Promise<void>;
 
-	/** Auto‐dispatch a team */
+	/** Auto-dispatch a team */
 	public autoDispatch!: (
 		id: string,
 		props?: AutoDispatchTeamProps,
 	) => Promise<AutoDispatchTeamResult>;
 
-	/** Insert tasks into a team’s container */
+	/** Insert tasks into a team's container */
 	public insertTask!: (id: string, props: InsertTaskProps) => Promise<OnfleetTeam>;
 
 	/** Get worker ETA for a team */
 	public getWorkerEta!: (id: string, props?: GetWorkerETAProps) => Promise<GetWorkerEtaResult>;
 
-	/** List tasks currently in a team’s container */
-	public listTasks!: (id: string, params?: ContainerQueryParams) => Promise<ContainerResult>;
+	/** List unassigned tasks in a team */
+	public getTasks!: (id: string, query?: TeamTasksQueryProps) => Promise<TeamTasksResult>;
 
 	constructor(api: Api) {
 		super(api);
@@ -154,7 +157,7 @@ export default class Teams extends Resource {
 			autoDispatch: { path: "/teams/:teamId/dispatch", method: "POST" },
 			getWorkerEta: { path: "/teams/:teamId/estimate", method: "GET", queryParams: true },
 			insertTask: { path: "/containers/teams/:teamId", method: "PUT" },
-			listTasks: { path: "/containers/teams/:teamId", method: "GET", queryParams: true },
+			getTasks: { path: "/teams/:teamId/tasks", method: "GET", queryParams: true },
 		});
 	}
 }
