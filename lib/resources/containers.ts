@@ -23,28 +23,49 @@ export interface OnfleetContainer {
 }
 
 /**
- * Container resource: operations for Onfleet containers
+ * Props for updating a container's tasks
+ */
+export interface UpdateContainerProps {
+	tasks: string[];
+}
+
+/**
+ * Container resource: retrieve and modify Onfleet containers
  */
 export default class Containers extends Resource {
 	/**
 	 * Retrieve a container by ID and group
 	 * @param id - Base64 ID of the container
-	 * @param group - One of "organizations", "teams", or "workers"
+	 * @param group - One of "organization", "team", or "worker"
 	 */
 	public get!: (
 		id: string,
-		group: "organizations" | "teams" | "workers",
+		group: "organization" | "team" | "worker",
+	) => Promise<OnfleetContainer>;
+
+	/**
+	 * Replace the tasks in a container
+	 * @param id - Base64 ID of the container
+	 * @param group - One of "organization", "team", or "worker"
+	 * @param props - New array of task IDs
+	 */
+	public update!: (
+		id: string,
+		group: "organization" | "team" | "worker",
+		props: UpdateContainerProps,
 	) => Promise<OnfleetContainer>;
 
 	constructor(api: Api) {
 		super(api);
-		// Use default API timeout
 		this.defineTimeout(null);
-
 		this.endpoints({
 			get: {
-				path: "/containers/:param/:containerId",
+				path: "/containers/:group/:containerId",
 				method: "GET",
+			},
+			update: {
+				path: "/containers/:group/:containerId",
+				method: "PUT",
 			},
 		});
 	}

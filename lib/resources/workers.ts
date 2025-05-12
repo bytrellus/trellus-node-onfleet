@@ -148,9 +148,6 @@ export default class Workers extends Resource {
 	/** List a worker's assigned tasks */
 	public getTasks!: (id: string, query?: GetWorkerTasksQueryProps) => Promise<OnfleetTask[]>;
 
-	/** Insert tasks into a worker's container */
-	public insertTask!: (id: string, props: { tasks: string[] }) => Promise<OnfleetWorker>;
-
 	/** Match metadata operations for workers */
 	public matchMetadata!: MatchMetadata<OnfleetWorker["metadata"]>;
 
@@ -186,10 +183,6 @@ export default class Workers extends Resource {
 				path: "/workers/:workerId/tasks",
 				method: "GET",
 				queryParams: true,
-			},
-			insertTask: {
-				path: "/containers/workers/:workerId",
-				method: "PUT",
 			},
 			matchMetadata: {
 				path: "/workers/metadata",

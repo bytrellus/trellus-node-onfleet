@@ -87,13 +87,6 @@ export interface GetWorkerEtaResult {
 }
 
 /**
- * Payload for inserting tasks into a team's container
- */
-export interface InsertTaskProps {
-	tasks: string[];
-}
-
-/**
  * Query parameters for listing unassigned tasks in a team
  */
 export interface TeamTasksQueryProps {
@@ -112,7 +105,7 @@ export interface TeamTasksResult {
 }
 
 /**
- * Teams resource: CRUD, auto-dispatch, ETA, task insertion, and unassigned task listing
+ * Teams resource: CRUD, auto-dispatch, ETA, and unassigned task listing
  */
 export default class Teams extends Resource {
 	/** Create a new team */
@@ -137,9 +130,6 @@ export default class Teams extends Resource {
 		props?: AutoDispatchTeamProps,
 	) => Promise<AutoDispatchTeamResult>;
 
-	/** Insert tasks into a team's container */
-	public insertTask!: (id: string, props: InsertTaskProps) => Promise<OnfleetTeam>;
-
 	/** Get worker ETA for a team */
 	public getWorkerEta!: (id: string, props?: GetWorkerETAProps) => Promise<GetWorkerEtaResult>;
 
@@ -156,7 +146,6 @@ export default class Teams extends Resource {
 			deleteOne: { path: "/teams/:teamId", method: "DELETE" },
 			autoDispatch: { path: "/teams/:teamId/dispatch", method: "POST" },
 			getWorkerEta: { path: "/teams/:teamId/estimate", method: "GET", queryParams: true },
-			insertTask: { path: "/containers/teams/:teamId", method: "PUT" },
 			getTasks: { path: "/teams/:teamId/tasks", method: "GET", queryParams: true },
 		});
 	}
