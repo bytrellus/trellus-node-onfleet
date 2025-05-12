@@ -1,0 +1,22 @@
+{
+	"compilerOptions": {
+		"target": "es2020",
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"esModuleInterop": true,
+		"outDir": "./dist",
+		"strict": true,
+		"types": ["node"],
+		"resolveJsonModule": true,
+		"declaration": true,
+		"allowSyntheticDefaultImports": true
+	},
+	"include": ["lib/**/*", "test/**/*"],
+	"ts-node": {
+		"esm": true,
+		"transpileOnly": true,
+		"compilerOptions": {
+			"module": "ESNext"
+		}
+	}
+}

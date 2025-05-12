@@ -1,4 +1,4 @@
-import { MatchMetadata, OnfleetMetadata } from "../metadata";
+import { OnfleetMetadata } from "../metadata";
 import Resource, { Api } from "../resource";
 
 /**
@@ -49,26 +49,15 @@ export interface OnfleetDestination {
  */
 export interface CreateDestinationProps {
 	address: DestinationAddress;
-	location?: Location;
 	notes?: string;
 }
 
-/**
- * Destinations resource: CRUD and metadata operations for Onfleet destinations
- */
 export default class Destinations extends Resource {
-	/**
-	 * Create a new destination
-	 */
+	/** Create a new destination */
 	public create!: (props: CreateDestinationProps) => Promise<OnfleetDestination>;
-	/**
-	 * Retrieve a destination by ID
-	 */
+
+	/** Retrieve a destination by ID */
 	public get!: (id: string) => Promise<OnfleetDestination>;
-	/**
-	 * Match metadata operations for destinations
-	 */
-	public matchMetadata!: MatchMetadata<OnfleetDestination["metadata"]>;
 
 	constructor(api: Api) {
 		super(api);
@@ -76,7 +65,6 @@ export default class Destinations extends Resource {
 		this.endpoints({
 			create: { path: "/destinations", method: "POST" },
 			get: { path: "/destinations/:destinationId", method: "GET" },
-			matchMetadata: { path: "/destinations/metadata", method: "POST" },
 		});
 	}
 }

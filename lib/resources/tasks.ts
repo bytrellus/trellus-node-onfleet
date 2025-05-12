@@ -3,7 +3,7 @@ import Resource, { Api } from "../resource";
 import { CreateDestinationProps, OnfleetDestination } from "./destinations";
 import { CreateRecipientProps, OnfleetRecipient } from "./recipients";
 
-/** Keys for querying tasks */
+/** Keys for querying tasks (only “shortId” in this case) */
 export type TaskQueryKey = "shortId";
 
 /** Possible task states */
@@ -63,7 +63,6 @@ export interface OnfleetTask extends OnfleetDestination {
 	organization: string;
 	executor: string;
 	container: TaskContainer;
-	// ...other fields as needed
 	metadata: OnfleetMetadata[];
 	recipients: OnfleetRecipient[];
 	completionDetails: TaskCompletionDetails;
@@ -86,85 +85,126 @@ export interface CreateMultipleTasksProps {
 	tasks: CreateTaskProps[];
 }
 
+/** Result of batch creation (synchronous) */
 export interface CreateMultipleTasksResult {
 	tasks: OnfleetTask[];
 }
 
+/** Result of batch creation (async) */
 export interface CreateAsyncMultipleTaskResult {
 	status: string;
 	jobId: string;
 }
 
+/** Single‐task GET adds ETA fields */
 export interface GetTaskResult extends OnfleetTask {
 	eta: number | null;
 	estimatedCompletionTime: number | null;
 }
 
+/** Multi‐task GET response */
 export interface GetManyTaskResult {
 	lastId?: string;
 	tasks: GetTaskResult[];
 }
 
+/** Update returns these fields */
 export interface UpdateTaskResult extends OnfleetTask {
 	eta: number;
 	estimatedArrivalTime: number | null;
 	estimatedCompletionTime: number | null;
 }
 
+/** Automatically‐assign props/result */
 export interface AutomaticallyAssignTaskProps {
 	tasks: string[];
 	options?: Partial<Record<string, unknown>>;
 }
-
 export interface AutomaticallyAssignTaskResult {
 	assignedTasksCount: number;
 	assignedTasks: Record<string, string>;
 }
 
 /**
- * Tasks resource: comprehensive CRUD, batch, clone, and metadata operations
+ * Tasks resource: comprehensive CRUD, batch, clone, shortId lookup,
+ * auto‐assign and metadata operations
  */
 export default class Tasks extends Resource {
+	/** Create a single task */
 	public create!: (props: CreateTaskProps) => Promise<OnfleetTask>;
+
+	/** Batch‐create tasks (deprecated) */
+	public batchCreate!: (props: CreateMultipleTasksProps) => Promise<CreateMultipleTasksResult>;
+
+	/** Batch‐create tasks asynchronously */
+	public batchCreateAsync!: (
+		props: CreateMultipleTasksProps,
+	) => Promise<CreateAsyncMultipleTaskResult>;
+
+	/** Check status of an async batch job */
+	public getBatch!: (jobId: string) => Promise<{ status: string; jobId: string }>;
+
+	/**
+	 * GET single task by ID, or list tasks (/tasks/all?…)
+	 *
+	 * Usage:
+	 * - `tasks.get("someTaskId")` → GET /tasks/someTaskId
+	 * - `tasks.get(undefined, { from, to, state, worker, … })` → GET /tasks/all?…
+	 */
 	public get!: (
-		queryOrId?: string,
-		queryKeyOrParams?: TaskQueryKey | Partial<Record<string, any>>,
+		idOrNothing?: string,
+		keyOrParams?: TaskQueryKey | Partial<Record<string, any>>,
 	) => Promise<OnfleetTask | GetManyTaskResult>;
+
+	/** Retrieve a task by its short ID */
+	public getByShortId!: (shortId: string) => Promise<OnfleetTask>;
+
+	/** Update a task */
 	public update!: (id: string, props: Partial<CreateTaskProps>) => Promise<UpdateTaskResult>;
-	public deleteOne!: (id: string) => Promise<number>;
-	public clone!: (id: string) => Promise<OnfleetTask>;
+
+	/** Force‐complete a task */
 	public forceComplete!: (
 		id: string,
 		details: { completionDetails: { success: boolean; notes?: string } },
 	) => Promise<void>;
-	public batchCreate!: (props: CreateMultipleTasksProps) => Promise<CreateMultipleTasksResult>;
-	public batchCreateAsync!: (
-		props: CreateMultipleTasksProps,
-	) => Promise<CreateAsyncMultipleTaskResult>;
-	public getBatch!: (jobId: string) => Promise<{ status: string; jobId: string }>; // simplified
+
+	/** Clone a task */
+	public clone!: (id: string) => Promise<OnfleetTask>;
+
+	/** Delete a task (returns number of deleted records) */
+	public deleteOne!: (id: string) => Promise<number>;
+
+	/** Automatically assign tasks */
 	public autoAssign!: (
 		props: AutomaticallyAssignTaskProps,
 	) => Promise<AutomaticallyAssignTaskResult>;
+
+	/** Metadata operations */
 	public matchMetadata!: MatchMetadata<OnfleetTask["metadata"]>;
 
 	constructor(api: Api) {
 		super(api);
 		this.defineTimeout(null);
+
 		this.endpoints({
 			create: { path: "/tasks", method: "POST" },
+			batchCreate: { path: "/tasks/batch", method: "POST" },
+			batchCreateAsync: { path: "/tasks/batch-async", method: "POST" },
+			getBatch: { path: "/tasks/batch/:batchId", method: "GET" },
+
 			get: {
 				path: "/tasks/:taskId",
 				altPath: "/tasks/all",
 				method: "GET",
 				queryParams: true,
 			},
+			getByShortId: { path: "/tasks/shortId/:taskId", method: "GET" },
+
 			update: { path: "/tasks/:taskId", method: "PUT" },
-			deleteOne: { path: "/tasks/:taskId", method: "DELETE" },
-			clone: { path: "/tasks/:taskId/clone", method: "POST" },
 			forceComplete: { path: "/tasks/:taskId/complete", method: "POST" },
-			batchCreate: { path: "/tasks/batch", method: "POST" },
-			batchCreateAsync: { path: "/tasks/batch-async", method: "POST" },
-			getBatch: { path: "/tasks/batch/:batchId", method: "GET", queryParams: true },
+			clone: { path: "/tasks/:taskId/clone", method: "POST" },
+			deleteOne: { path: "/tasks/:taskId", method: "DELETE" },
+
 			autoAssign: { path: "/tasks/autoAssign", method: "POST" },
 			matchMetadata: { path: "/tasks/metadata", method: "POST" },
 		});

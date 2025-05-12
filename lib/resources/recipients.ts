@@ -2,11 +2,6 @@ import { MatchMetadata, OnfleetMetadata } from "../metadata";
 import Resource, { Api } from "../resource";
 
 /**
- * Keys for querying recipients: by phone or name
- */
-export type RecipientQueryKey = "phone" | "name";
-
-/**
  * Shape of a recipient object returned by Onfleet
  */
 export interface OnfleetRecipient {
@@ -33,38 +28,41 @@ export interface CreateRecipientProps {
 	skipPhoneNumberValidation?: boolean;
 }
 
-/**
- * Recipients resource: CRUD and metadata operations for Onfleet recipients
- */
 export default class Recipients extends Resource {
-	/**
-	 * Create a new recipient
-	 */
+	/** Create a new recipient */
 	public create!: (props: CreateRecipientProps) => Promise<OnfleetRecipient>;
 
-	/**
-	 * Retrieve a recipient by ID or query by phone/name
-	 */
-	public get!: (queryOrId: string, queryKey?: RecipientQueryKey) => Promise<OnfleetRecipient>;
+	/** Retrieve a recipient by ID */
+	public get!: (id: string) => Promise<OnfleetRecipient>;
+
+	/** Find a recipient by (exact) name */
+	public findByName!: (name: string) => Promise<OnfleetRecipient>;
 
 	/**
-	 * Match metadata operations for recipients
+	 * Find a recipient by (E.164-formatted) phone.
+	 * Pass `{ skipPhoneNumberValidation: true }` to bypass validation.
 	 */
-	public matchMetadata!: MatchMetadata<OnfleetRecipient["metadata"]>;
+	public findByPhone!: (
+		phone: string,
+		query?: { skipPhoneNumberValidation?: boolean },
+	) => Promise<OnfleetRecipient>;
 
-	/**
-	 * Update a recipient by ID
-	 */
+	/** Update a recipient by ID */
 	public update!: (id: string, props: Partial<CreateRecipientProps>) => Promise<OnfleetRecipient>;
+
+	/** Metadata operations for recipients */
+	public matchMetadata!: MatchMetadata<OnfleetRecipient["metadata"]>;
 
 	constructor(api: Api) {
 		super(api);
 		this.defineTimeout(null);
 		this.endpoints({
 			create: { path: "/recipients", method: "POST" },
-			get: { path: "/recipients/:recipientId", method: "GET", queryParams: true },
-			matchMetadata: { path: "/recipients/metadata", method: "POST" },
+			get: { path: "/recipients/:recipientId", method: "GET" },
+			findByName: { path: "/recipients/name/:name", method: "GET" },
+			findByPhone: { path: "/recipients/phone/:phone", method: "GET", queryParams: true },
 			update: { path: "/recipients/:recipientId", method: "PUT" },
+			matchMetadata: { path: "/recipients/metadata", method: "POST" },
 		});
 	}
 }

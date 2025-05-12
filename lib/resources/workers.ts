@@ -1,6 +1,7 @@
 import { MatchMetadata, OnfleetMetadata } from "../metadata";
 import Resource, { Api } from "../resource";
 import { Location } from "./destinations";
+import type { OnfleetTask } from "./tasks"; // assumes tasks.ts exports this
 
 /**
  * Vehicle information for a worker
@@ -22,13 +23,16 @@ export interface WorkerSchedule {
 }
 
 /**
- * Query parameters for fetching workers
+ * Query parameters for fetching workers (list & single)
  */
 export interface GetWorkerQueryProps {
 	filter?: string;
 	phones?: string;
 	states?: string;
 	teams?: string;
+	analytics?: boolean;
+	from?: number;
+	to?: number;
 }
 
 /**
@@ -56,10 +60,16 @@ export interface CreateWorkerProps {
 export interface UpdateWorkerProps {
 	capacity?: number;
 	displayName?: string;
-	metadata?: OnfleetMetadata[];
 	name?: string;
 	teams?: string | string[];
 	vehicle?: Vehicle;
+}
+
+/**
+ * Recurring schedule entries response
+ */
+export interface ScheduleEntries {
+	entries: WorkerSchedule[];
 }
 
 /**
@@ -94,17 +104,20 @@ export interface OnfleetWorker {
 }
 
 /**
- * Recurring schedule entries response
- */
-export interface ScheduleEntries {
-	entries: WorkerSchedule[];
-}
-
-/**
  * Response for getByLocation
  */
 export interface WorkersByLocationResult {
 	workers: OnfleetWorker[];
+}
+
+/**
+ * Query parameters for listing a worker's assigned tasks
+ */
+export interface GetWorkerTasksQueryProps {
+	filter?: string;
+	analytics?: boolean;
+	from?: number;
+	to?: number;
 }
 
 /**
@@ -129,14 +142,17 @@ export default class Workers extends Resource {
 	/** Get a worker's schedule */
 	public getSchedule!: (id: string) => Promise<ScheduleEntries>;
 
+	/** Set a worker's schedule */
+	public setSchedule!: (id: string, schedule: ScheduleEntries) => Promise<ScheduleEntries>;
+
+	/** List a worker's assigned tasks */
+	public getTasks!: (id: string, query?: GetWorkerTasksQueryProps) => Promise<OnfleetTask[]>;
+
 	/** Insert tasks into a worker's container */
 	public insertTask!: (id: string, props: { tasks: string[] }) => Promise<OnfleetWorker>;
 
 	/** Match metadata operations for workers */
 	public matchMetadata!: MatchMetadata<OnfleetWorker["metadata"]>;
-
-	/** Set a worker's schedule */
-	public setSchedule!: (id: string, schedule: WorkerSchedule) => Promise<ScheduleEntries>;
 
 	/** Update an existing worker */
 	public update!: (id: string, props: UpdateWorkerProps) => Promise<OnfleetWorker>;
@@ -144,6 +160,7 @@ export default class Workers extends Resource {
 	constructor(api: Api) {
 		super(api);
 		this.defineTimeout(null);
+
 		this.endpoints({
 			create: { path: "/workers", method: "POST" },
 			get: {
@@ -154,16 +171,38 @@ export default class Workers extends Resource {
 			},
 			getByLocation: {
 				path: "/workers/location",
-				altPath: "/workers/location",
 				method: "GET",
 				queryParams: true,
 			},
-			update: { path: "/workers/:workerId", method: "PUT" },
-			deleteOne: { path: "/workers/:workerId", method: "DELETE" },
-			insertTask: { path: "/containers/workers/:workerId", method: "PUT" },
-			getSchedule: { path: "/workers/:workerId/schedule", method: "GET" },
-			setSchedule: { path: "/workers/:workerId/schedule", method: "POST" },
-			matchMetadata: { path: "/workers/metadata", method: "POST" },
+			getSchedule: {
+				path: "/workers/:workerId/schedule",
+				method: "GET",
+			},
+			setSchedule: {
+				path: "/workers/:workerId/schedule",
+				method: "POST",
+			},
+			getTasks: {
+				path: "/workers/:workerId/tasks",
+				method: "GET",
+				queryParams: true,
+			},
+			insertTask: {
+				path: "/containers/workers/:workerId",
+				method: "PUT",
+			},
+			matchMetadata: {
+				path: "/workers/metadata",
+				method: "POST",
+			},
+			update: {
+				path: "/workers/:workerId",
+				method: "PUT",
+			},
+			deleteOne: {
+				path: "/workers/:workerId",
+				method: "DELETE",
+			},
 		});
 	}
 }

@@ -35,7 +35,7 @@ export interface UpdateTeamProps {
 }
 
 /**
- * Options for auto-dispatching a team
+ * Options for auto‐dispatching a team
  */
 export interface AutoDispatchTeamProps {
 	maxAllowedDelay?: number;
@@ -47,7 +47,7 @@ export interface AutoDispatchTeamProps {
 }
 
 /**
- * Result of an auto-dispatch operation
+ * Result of an auto‐dispatch operation
  */
 export interface AutoDispatchTeamResult {
 	dispatchId: string;
@@ -86,27 +86,62 @@ export interface GetWorkerEtaResult {
 }
 
 /**
- * Payload for inserting tasks into a team
+ * Payload for inserting tasks into a team container
  */
 export interface InsertTaskProps {
 	tasks: string[];
 }
 
 /**
- * Teams resource: CRUD, auto-dispatch, ETA, and task insertion
+ * Query parameters for listing tasks in a container
+ */
+export interface ContainerQueryParams {
+	since?: number;
+	until?: number;
+	count?: number;
+}
+
+/**
+ * Result of listing tasks in a container
+ */
+export interface ContainerResult {
+	tasks: string[];
+}
+
+/**
+ * Teams resource: CRUD, auto‐dispatch, ETA, and container operations
  */
 export default class Teams extends Resource {
+	/** Create a new team */
 	public create!: (props: CreateTeamProps) => Promise<OnfleetTeam>;
+
+	/**
+	 * Retrieve one team by ID, or list all teams
+	 * - `teams.get("id")` → GET /teams/:teamId
+	 * - `teams.get()`    → GET /teams
+	 */
 	public get!: (id?: string) => Promise<OnfleetTeam | OnfleetTeam[]>;
+
+	/** Update a team by ID */
 	public update!: (id: string, props: UpdateTeamProps) => Promise<OnfleetTeam>;
+
+	/** Delete a team by ID */
 	public deleteOne!: (id: string) => Promise<void>;
+
+	/** Auto‐dispatch a team */
 	public autoDispatch!: (
 		id: string,
 		props?: AutoDispatchTeamProps,
 	) => Promise<AutoDispatchTeamResult>;
+
+	/** Insert tasks into a team’s container */
 	public insertTask!: (id: string, props: InsertTaskProps) => Promise<OnfleetTeam>;
+
+	/** Get worker ETA for a team */
 	public getWorkerEta!: (id: string, props?: GetWorkerETAProps) => Promise<GetWorkerEtaResult>;
-	public getTasks!: (id: string) => Promise<any[]>;
+
+	/** List tasks currently in a team’s container */
+	public listTasks!: (id: string, params?: ContainerQueryParams) => Promise<ContainerResult>;
 
 	constructor(api: Api) {
 		super(api);
@@ -117,9 +152,9 @@ export default class Teams extends Resource {
 			update: { path: "/teams/:teamId", method: "PUT" },
 			deleteOne: { path: "/teams/:teamId", method: "DELETE" },
 			autoDispatch: { path: "/teams/:teamId/dispatch", method: "POST" },
-			insertTask: { path: "/containers/teams/:teamId", method: "PUT" },
 			getWorkerEta: { path: "/teams/:teamId/estimate", method: "GET", queryParams: true },
-			getTasks: { path: "/teams/:teamId/tasks", method: "GET", queryParams: true },
+			insertTask: { path: "/containers/teams/:teamId", method: "PUT" },
+			listTasks: { path: "/containers/teams/:teamId", method: "GET", queryParams: true },
 		});
 	}
 }
