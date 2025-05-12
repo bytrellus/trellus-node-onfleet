@@ -27,14 +27,7 @@ export interface Delegatee {
 }
 
 /**
- * Container task insertion parameters for organization
- */
-export interface InsertTaskProps {
-	tasks: string[];
-}
-
-/**
- * Organization resource: fetch and update organization data
+ * Organization resource: fetch organization details
  */
 export default class Organization extends Resource {
 	/**
@@ -42,13 +35,6 @@ export default class Organization extends Resource {
 	 * @param id - Optional organization ID
 	 */
 	public get!: (id?: string) => Promise<OnfleetOrganization | Delegatee>;
-
-	/**
-	 * Insert tasks into an organization container
-	 * @param id - Organization ID
-	 * @param props - Object containing tasks array
-	 */
-	public insertTask!: (id: string, props: InsertTaskProps) => Promise<unknown>;
 
 	constructor(api: Api) {
 		super(api);
@@ -58,10 +44,6 @@ export default class Organization extends Resource {
 				path: "/organizations/:orgId",
 				altPath: "/organization",
 				method: "GET",
-			},
-			insertTask: {
-				path: "/containers/organizations/:orgId",
-				method: "PUT",
 			},
 		});
 	}
