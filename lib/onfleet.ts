@@ -10,6 +10,8 @@ import Destinations from "./resources/destinations";
 import Hubs from "./resources/hubs";
 import Organization from "./resources/organization";
 import Recipients from "./resources/recipients";
+import RouteOptimizations from "./resources/routeOptimizations";
+import RoutePlans from "./resources/routePlan";
 import Tasks from "./resources/tasks";
 import Teams from "./resources/teams";
 import Webhooks from "./resources/webhooks";
@@ -54,6 +56,8 @@ const resources = {
 	Webhooks,
 	CustomFields,
 	Workers,
+	RoutePlans,
+	RouteOptimizations,
 } as const;
 
 /**
