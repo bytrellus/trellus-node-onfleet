@@ -2,9 +2,13 @@
 	"name": "@bytrellus/node-onfleet",
 	"version": "1.0.0",
 	"description": "Trellus Fork of Onfleet's Node.js API Wrapper Package",
-	"main": "index.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
-		"test": "mocha"
+		"build": "tsc --project tsconfig.json",
+		"lint": "eslint 'src/**/*.ts'",
+		"test": "mocha -r ts-node/register 'test/**/*.spec.ts'",
+		"prepare": "npm run build"
 	},
 	"repository": {
 		"type": "git",
@@ -21,16 +25,23 @@
 	"license": "MIT",
 	"homepage": "https://onfleet.com/",
 	"type": "module",
+	"files": [
+		"dist"
+	],
 	"dependencies": {
 		"bottleneck": "^2.19.5",
 		"node-fetch": "^3.3.2"
 	},
 	"devDependencies": {
+		"@types/chai": "^4.3.4",
+		"@types/node": "^20.0.0",
 		"chai": "^5.1.1",
 		"chai-as-promised": "^8.0.0",
-		"minimist": "^1.2.8",
+		"eslint": "^8.0.0",
 		"mocha": "^10.7.3",
-		"nock": "^13.5.5"
+		"nock": "^13.5.5",
+		"ts-node": "^10.9.1",
+		"typescript": "^5.1.3"
 	},
 	"engines": {
 		"node": ">=20.0.0"

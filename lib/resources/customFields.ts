@@ -1,13 +1,14 @@
-import Resource from "../Resource.js";
+import Resource, { Api } from "../resource";
 
 /**
- * @desc this class holds the CRUD methods allowed on the Custom Fields endpoint
+ * Defines the CRUD operations available on the CustomFields endpoint
  */
-
 export default class CustomFields extends Resource {
-	constructor(api) {
+	constructor(api: Api) {
 		super(api);
-		this.defineTimeout();
+		// Use default API timeout
+		this.defineTimeout(null);
+
 		this.endpoints({
 			create: {
 				path: "/customFields",
