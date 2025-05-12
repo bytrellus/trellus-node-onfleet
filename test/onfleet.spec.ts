@@ -102,9 +102,6 @@ describe("Utility function testing - Auth test returns 200 ok", () => {
 
 describe("Limiter without options", () => {
 	it("limiter without bottleneck options should have default settings", () => {
-		const onfleet = new Onfleet({ apiKey });
-
-		// Use type assertion to access the private property
 		const store = (Onfleet.limiter as any)._store;
 		expect(store.storeOptions.maxConcurrent).toBe(LIMITER_DEFAULT_MAX_CONCURRENT);
 		expect(store.storeOptions.minTime).toBe(LIMITER_DEFAULT_MIN_TIME);
@@ -133,7 +130,6 @@ describe("Limiter with options", () => {
 		//bottleneck options get updated on the next request
 		await onfleet.administrators.get();
 
-		// Use type assertion to access the private property
 		const store = (Onfleet.limiter as any)._store;
 		expect(store.storeOptions.maxConcurrent).toBe(LIMITER_DEFAULT_MAX_CONCURRENT);
 		expect(store.storeOptions.minTime).toBe(LIMITER_DEFAULT_MIN_TIME);
@@ -154,7 +150,6 @@ describe("Limiter with options", () => {
 		//bottleneck options get updated on the next request
 		await onfleet.administrators.get();
 
-		// Use type assertion to access the private property
 		const store = (Onfleet.limiter as any)._store;
 		expect(store.storeOptions.maxConcurrent).toBe(validMaxConcurrent);
 		expect(store.storeOptions.minTime).toBe(validMinTime);
@@ -206,7 +201,6 @@ describe("Limiter behavior tests", () => {
 		// Make an initial request to ensure settings are applied
 		await onfleet.administrators.get();
 
-		// Now test the behavior
 		const startTime = Date.now();
 		const requests: Promise<any>[] = [];
 
@@ -629,6 +623,68 @@ describe("Resource Request Testing", () => {
 		it("should create a custom field", async () => {
 			const res = await onfleet.customfields.create(createCustomField);
 			expect(res).toBe(200);
+		});
+	});
+
+	describe("RoutePlans Resource", () => {
+		describe("Get Route Plans", () => {
+			beforeEach(() => {
+				nock(baseUrl)
+					.get((uri) => uri.includes("/routePlans"))
+					.reply(200, response.getRoutePlans);
+			});
+
+			it("should list all route plans", async () => {
+				const res = await onfleet.routeplans.get();
+				expect(Array.isArray(res)).toBe(true);
+				expect(res[0].id).toBe(response.getRoutePlans[0].id);
+			});
+		});
+
+		describe("Create Route Plan", () => {
+			beforeEach(() => {
+				nock(baseUrl)
+					.post((uri) => uri.includes("/routePlans"))
+					.reply(200, response.createRoutePlan);
+			});
+
+			it("should create a new route plan", async () => {
+				const res = await onfleet.routeplans.create(response.createRoutePlanProps);
+				expect(res.id).toBe(response.createRoutePlan.id);
+				expect(res.name).toBe(response.createRoutePlan.name);
+			});
+		});
+	});
+
+	describe("RouteOptimizations Resource", () => {
+		describe("Schedule Optimization", () => {
+			beforeEach(() => {
+				nock(baseUrl)
+					.post((uri) => uri.includes("/optimizations/scheduled"))
+					.reply(200, response.scheduleOptimization);
+			});
+
+			it("should schedule a new route optimization", async () => {
+				const res = await onfleet.routeoptimizations.schedule(
+					response.scheduleOptimizationProps,
+				);
+				expect(res.issues).toEqual(response.scheduleOptimization.issues);
+				expect(res.id).toBe(response.scheduleOptimization.id);
+			});
+		});
+
+		describe("Start Optimization", () => {
+			beforeEach(() => {
+				nock(baseUrl)
+					.post((uri) => uri.includes("/optimizations/CQ6rFedL7VBL2VjURsGnb1cx/start"))
+					.reply(200);
+			});
+
+			it("should start the optimization engine", async () => {
+				await expect(
+					onfleet.routeoptimizations.start("CQ6rFedL7VBL2VjURsGnb1cx"),
+				).resolves.toBe(200);
+			});
 		});
 	});
 });

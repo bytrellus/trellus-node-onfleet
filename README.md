@@ -30,7 +30,7 @@ Improvements This Package Makes:
     -   Adds missing workers.getTasks
     -   Fixes wrong type on workers.setSchedule
     -   Adds missing recipients.findByName and .findByPhone
--   Added Route Plan resource
--   Added Route Optimization resource
+-   Added Route Plan resource, basic tests included
+-   Added Route Optimization resource, basic tests included
 -   Fix issue with custom error creation
 -   Lots of documentation via JSDoc / comments
