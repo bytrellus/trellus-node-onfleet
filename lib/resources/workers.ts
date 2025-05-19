@@ -60,6 +60,7 @@ export interface CreateWorkerProps {
 export interface UpdateWorkerProps {
 	capacity?: number;
 	displayName?: string;
+	metadata?: OnfleetMetadata;
 	name?: string;
 	teams?: string | string[];
 	vehicle?: Vehicle;
@@ -121,37 +122,21 @@ export interface GetWorkerTasksQueryProps {
 }
 
 /**
- * Workers resource: CRUD, scheduling, metadata, and location operations
+ * Workers resource: CRUD, scheduling, metadata, location, and task operations
  */
 export default class Workers extends Resource {
-	/** Create a new worker */
 	public create!: (props: CreateWorkerProps) => Promise<OnfleetWorker>;
-
-	/** Delete a worker by ID */
 	public deleteOne!: (id: string) => Promise<void>;
-
-	/** Retrieve workers or a specific worker by ID */
 	public get!: (
 		id?: string,
 		query?: GetWorkerQueryProps,
 	) => Promise<OnfleetWorker | OnfleetWorker[]>;
-
-	/** Retrieve workers near a location */
 	public getByLocation!: (location: GetWorkerByLocationProps) => Promise<WorkersByLocationResult>;
-
-	/** Get a worker's schedule */
 	public getSchedule!: (id: string) => Promise<ScheduleEntries>;
-
-	/** Set a worker's schedule */
 	public setSchedule!: (id: string, schedule: ScheduleEntries) => Promise<ScheduleEntries>;
-
-	/** List a worker's assigned tasks */
+	public insertTask!: (id: string, props: { tasks: string[] }) => Promise<OnfleetWorker>;
 	public getTasks!: (id: string, query?: GetWorkerTasksQueryProps) => Promise<OnfleetTask[]>;
-
-	/** Match metadata operations for workers */
 	public matchMetadata!: MatchMetadata<OnfleetWorker["metadata"]>;
-
-	/** Update an existing worker */
 	public update!: (id: string, props: UpdateWorkerProps) => Promise<OnfleetWorker>;
 
 	constructor(api: Api) {
@@ -171,31 +156,13 @@ export default class Workers extends Resource {
 				method: "GET",
 				queryParams: true,
 			},
-			getSchedule: {
-				path: "/workers/:workerId/schedule",
-				method: "GET",
-			},
-			setSchedule: {
-				path: "/workers/:workerId/schedule",
-				method: "POST",
-			},
-			getTasks: {
-				path: "/workers/:workerId/tasks",
-				method: "GET",
-				queryParams: true,
-			},
-			matchMetadata: {
-				path: "/workers/metadata",
-				method: "POST",
-			},
-			update: {
-				path: "/workers/:workerId",
-				method: "PUT",
-			},
-			deleteOne: {
-				path: "/workers/:workerId",
-				method: "DELETE",
-			},
+			getSchedule: { path: "/workers/:workerId/schedule", method: "GET" },
+			setSchedule: { path: "/workers/:workerId/schedule", method: "POST" },
+			getTasks: { path: "/workers/:workerId/tasks", method: "GET", queryParams: true },
+			insertTask: { path: "/workers/:workerId/insertTasks", method: "PUT" },
+			matchMetadata: { path: "/workers/metadata", method: "POST" },
+			update: { path: "/workers/:workerId", method: "PUT" },
+			deleteOne: { path: "/workers/:workerId", method: "DELETE" },
 		});
 	}
 }

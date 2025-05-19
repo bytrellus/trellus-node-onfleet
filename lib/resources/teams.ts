@@ -2,9 +2,7 @@ import Resource, { Api } from "../resource.js";
 import { Location } from "../resources/destinations.js";
 import type { OnfleetTask } from "../resources/tasks.js";
 
-/**
- * Representation of an Onfleet Team
- */
+/** Representation of an Onfleet Team */
 export interface OnfleetTeam {
 	hub: string;
 	id: string;
@@ -15,9 +13,7 @@ export interface OnfleetTeam {
 	workers: string[];
 }
 
-/**
- * Properties for creating a new team
- */
+/** Props for creating a new team */
 export interface CreateTeamProps {
 	managers: string[];
 	name: string;
@@ -25,9 +21,7 @@ export interface CreateTeamProps {
 	hub?: string;
 }
 
-/**
- * Properties for updating a team
- */
+/** Props for updating a team */
 export interface UpdateTeamProps {
 	managers?: string[];
 	name?: string;
@@ -35,9 +29,7 @@ export interface UpdateTeamProps {
 	hub?: string;
 }
 
-/**
- * Options for auto-dispatching a team
- */
+/** Options for auto-dispatching a team */
 export interface AutoDispatchTeamProps {
 	maxAllowedDelay?: number;
 	maxTasksPerRoute?: number;
@@ -47,16 +39,12 @@ export interface AutoDispatchTeamProps {
 	taskTimeWindow?: [number, number];
 }
 
-/**
- * Result of an auto-dispatch operation
- */
+/** Result of an auto-dispatch operation */
 export interface AutoDispatchTeamResult {
 	dispatchId: string;
 }
 
-/**
- * Parameters for retrieving worker ETA
- */
+/** Params for retrieving worker ETA */
 export interface GetWorkerETAProps {
 	dropoffLocation?: string;
 	pickupLocation?: string;
@@ -65,9 +53,7 @@ export interface GetWorkerETAProps {
 	serviceTime?: number;
 }
 
-/**
- * Steps in a navigation route
- */
+/** Steps in a navigation route */
 export interface NavigationStep {
 	arrivalTime: number;
 	completionTime: number;
@@ -77,36 +63,28 @@ export interface NavigationStep {
 	travelTime: number;
 }
 
-/**
- * Response for worker ETA queries
- */
+/** Response for worker ETA queries */
 export interface GetWorkerEtaResult {
 	workerId: string;
 	vehicle: "BICYCLE" | "CAR" | "MOTORCYCLE" | "TRUCK";
 	steps: NavigationStep[];
 }
 
-/**
- * Query parameters for listing unassigned tasks in a team
- */
+/** Query parameters for listing unassigned tasks in a team */
 export interface TeamTasksQueryProps {
 	isPickupTask?: boolean;
-	to?: number;
 	from?: number;
+	to?: number;
 	lastId?: string;
 }
 
-/**
- * Result for listing unassigned tasks in a team
- */
+/** Result for listing unassigned tasks in a team */
 export interface TeamTasksResult {
 	tasks: OnfleetTask[];
 	lastId?: string;
 }
 
-/**
- * Teams resource: CRUD, auto-dispatch, ETA, and unassigned task listing
- */
+/** Teams resource: CRUD, scheduling, auto-dispatch, ETA, task insertion & listing */
 export default class Teams extends Resource {
 	/** Create a new team */
 	public create!: (props: CreateTeamProps) => Promise<OnfleetTeam>;
@@ -134,19 +112,33 @@ export default class Teams extends Resource {
 	public getWorkerEta!: (id: string, props?: GetWorkerETAProps) => Promise<GetWorkerEtaResult>;
 
 	/** List unassigned tasks in a team */
+
 	public getTasks!: (id: string, query?: TeamTasksQueryProps) => Promise<TeamTasksResult>;
 
 	constructor(api: Api) {
 		super(api);
 		this.defineTimeout(null);
+
 		this.endpoints({
 			create: { path: "/teams", method: "POST" },
 			get: { path: "/teams/:teamId", altPath: "/teams", method: "GET" },
 			update: { path: "/teams/:teamId", method: "PUT" },
 			deleteOne: { path: "/teams/:teamId", method: "DELETE" },
 			autoDispatch: { path: "/teams/:teamId/dispatch", method: "POST" },
-			getWorkerEta: { path: "/teams/:teamId/estimate", method: "GET", queryParams: true },
-			getTasks: { path: "/teams/:teamId/tasks", method: "GET", queryParams: true },
+			getWorkerEta: {
+				path: "/teams/:teamId/estimate",
+				method: "GET",
+				queryParams: true,
+			},
+			insertTask: {
+				path: "/teams/:teamId/insertTasks",
+				method: "PUT",
+			},
+			getTasks: {
+				path: "/teams/:teamId/tasks",
+				method: "GET",
+				queryParams: true,
+			},
 		});
 	}
 }

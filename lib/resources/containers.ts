@@ -1,8 +1,6 @@
 import Resource, { Api } from "../resource.js";
 
-/**
- * Shape of a container object returned by Onfleet
- */
+/** Shape of a container object returned by Onfleet */
 export interface OnfleetContainer {
 	/** Unique identifier of the container */
 	id: string;
@@ -22,36 +20,33 @@ export interface OnfleetContainer {
 	worker: string;
 }
 
-/**
- * Props for updating a container's tasks
- */
+/** Props for updating a container's tasks */
 export interface UpdateContainerProps {
+	/** Array of task IDs to set on the container */
 	tasks: string[];
 }
 
-/**
- * Container resource: retrieve and modify Onfleet containers
- */
+/** Container resource: retrieve and modify Onfleet containers */
 export default class Containers extends Resource {
 	/**
 	 * Retrieve a container by ID and group
 	 * @param id - Base64 ID of the container
-	 * @param group - One of "organization", "team", or "worker"
+	 * @param group - One of "organizations", "teams", or "workers"
 	 */
 	public get!: (
 		id: string,
-		group: "organization" | "team" | "worker",
+		group: "organizations" | "teams" | "workers",
 	) => Promise<OnfleetContainer>;
 
 	/**
 	 * Replace the tasks in a container
 	 * @param id - Base64 ID of the container
-	 * @param group - One of "organization", "team", or "worker"
+	 * @param group - One of "organizations", "teams", or "workers"
 	 * @param props - New array of task IDs
 	 */
 	public update!: (
 		id: string,
-		group: "organization" | "team" | "worker",
+		group: "organizations" | "teams" | "workers",
 		props: UpdateContainerProps,
 	) => Promise<OnfleetContainer>;
 

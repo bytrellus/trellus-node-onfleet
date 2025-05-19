@@ -1,59 +1,67 @@
 import { MatchMetadata, OnfleetMetadata } from "../metadata.js";
 import Resource, { Api } from "../resource.js";
 
+/** Shape of an administrator in Onfleet */
 export interface OnfleetAdmin {
-	email: string;
+	/** Unique identifier */
 	id: string;
-	isActive: boolean;
-	metadata: OnfleetMetadata;
+	/** Email address */
+	email: string;
+	/** Full name */
 	name: string;
+	/** Whether the admin is active */
+	isActive: boolean;
+	/** The admin’s metadata object */
+	metadata: OnfleetMetadata;
+	/** Organization ID */
 	organization: string;
+	/** Phone number */
 	phone: string;
+	/** When created (ms since epoch) */
 	timeCreated: number;
+	/** When last modified (ms since epoch) */
 	timeLastModified: number;
+	/** Admin type */
 	type: "super" | "standard";
 }
 
+/** Props for creating a new administrator */
 export interface CreateAdminProps {
 	/** The administrator’s email address */
 	email: string;
 	/** The administrator’s complete name */
 	name: string;
-	/** Optional. The administrator's phone number. */
+	/** Optional phone number */
 	phone?: string;
-	/** Optional. Whether this administrator can perform write operations. */
+	/** Optional flag: true => read-only (cannot write) */
 	isReadOnly?: boolean;
 }
 
+/** Props for updating an existing administrator */
 export interface UpdateAdminProps {
+	/** New email address */
 	email?: string;
+	/** New full name */
 	name?: string;
+	/** New metadata object */
 	metadata?: OnfleetMetadata;
 }
 
-/**
- * Administrators resource: CRUD operations for Onfleet administrators
- */
+/** Administrators resource: CRUD & metadata operations */
 export default class Administrators extends Resource {
-	/**
-	 * Create a new administrator
-	 */
+	/** Create a new administrator */
 	public create!: (props: CreateAdminProps) => Promise<OnfleetAdmin>;
-	/**
-	 * Retrieve all administrators
-	 */
+
+	/** Retrieve all administrators */
 	public get!: () => Promise<OnfleetAdmin[]>;
-	/**
-	 * Update an existing administrator
-	 */
+
+	/** Update an existing administrator */
 	public update!: (id: string, props: UpdateAdminProps) => Promise<OnfleetAdmin>;
-	/**
-	 * Delete a specific administrator by ID
-	 */
+
+	/** Delete a specific administrator by ID */
 	public deleteOne!: (id: string) => Promise<void>;
-	/**
-	 * Match metadata operations for administrators
-	 */
+
+	/** Metadata operations for administrators */
 	public matchMetadata!: MatchMetadata<OnfleetAdmin["metadata"]>;
 
 	constructor(api: Api) {

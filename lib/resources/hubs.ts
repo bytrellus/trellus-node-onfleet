@@ -5,9 +5,7 @@ import {
 	Location,
 } from "../resources/destinations.js";
 
-/**
- * Shape of a hub object returned by Onfleet
- */
+/** Shape of a hub object returned by Onfleet */
 export interface OnfleetHub {
 	/** Street address of the hub */
 	address: BaseDestination["address"];
@@ -21,33 +19,29 @@ export interface OnfleetHub {
 	teams: string[];
 }
 
-/**
- * Properties for creating a new hub
- */
+/** Properties for creating a new hub */
 export interface CreateHubProps {
-	/** The hub’s street address information. */
+	/** The hub’s street address information */
 	address: DestinationAddress;
-	/** A name to identify the Hub. */
+	/** A name to identify the Hub */
 	name: string;
-	/** Team ID(s) that this Hub will be assigned to. */
+	/** Team ID(s) that this Hub will be assigned to */
 	team?: string[];
 }
 
-/**
- * Hubs resource: CRUD operations for Onfleet hubs
- */
+/** Hubs resource: CRUD operations for Onfleet hubs */
 export default class Hubs extends Resource {
-	/**
-	 * Create a new hub
-	 */
+	/** Create a new hub */
 	public create!: (props: CreateHubProps) => Promise<OnfleetHub>;
+
 	/**
-	 * Retrieve all hubs
+	 * Retrieve all hubs or a specific hub by ID
+	 * - get() → GET /hubs
+	 * - get(id) → GET /hubs/:hubId
 	 */
-	public get!: () => Promise<OnfleetHub[]>;
-	/**
-	 * Update a hub by ID
-	 */
+	public get!: (id?: string) => Promise<OnfleetHub | OnfleetHub[]>;
+
+	/** Update a hub by ID */
 	public update!: (id: string, props: Partial<OnfleetHub>) => Promise<OnfleetHub>;
 
 	constructor(api: Api) {
@@ -55,7 +49,12 @@ export default class Hubs extends Resource {
 		this.defineTimeout(null);
 		this.endpoints({
 			create: { path: "/hubs", method: "POST" },
-			get: { path: "/hubs", method: "GET" },
+			get: {
+				path: "/hubs/:hubId",
+				altPath: "/hubs",
+				method: "GET",
+				queryParams: false,
+			},
 			update: { path: "/hubs/:hubId", method: "PUT" },
 		});
 	}

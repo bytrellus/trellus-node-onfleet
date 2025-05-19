@@ -1,9 +1,10 @@
 import { MatchMetadata, OnfleetMetadata } from "../metadata.js";
 import Resource, { Api } from "../resource.js";
 
-/**
- * Shape of a recipient object returned by Onfleet
- */
+/** Keys for querying recipients */
+export type RecipientQueryKey = "phone" | "name";
+
+/** Shape of a recipient object returned by Onfleet */
 export interface OnfleetRecipient {
 	id: string;
 	metadata: OnfleetMetadata[];
@@ -16,9 +17,7 @@ export interface OnfleetRecipient {
 	timeLastModified: number;
 }
 
-/**
- * Properties for creating a new recipient
- */
+/** Properties for creating a new recipient */
 export interface CreateRecipientProps {
 	name: string;
 	phone: string;
@@ -28,20 +27,23 @@ export interface CreateRecipientProps {
 	skipPhoneNumberValidation?: boolean;
 }
 
+/** Recipients resource: CRUD and metadata operations */
 export default class Recipients extends Resource {
 	/** Create a new recipient */
 	public create!: (props: CreateRecipientProps) => Promise<OnfleetRecipient>;
 
-	/** Retrieve a recipient by ID */
-	public get!: (id: string) => Promise<OnfleetRecipient>;
+	/**
+	 * Retrieve a recipient by ID or lookup by name/phone
+	 * - get(id) → GET /recipients/:recipientId
+	 * - get(value, "name") → GET /recipients/name/:value
+	 * - get(value, "phone") → GET /recipients/phone/:value
+	 */
+	public get!: (value: string, key?: RecipientQueryKey) => Promise<OnfleetRecipient>;
 
-	/** Find a recipient by (exact) name */
+	/** Alias for get(value, "name") */
 	public findByName!: (name: string) => Promise<OnfleetRecipient>;
 
-	/**
-	 * Find a recipient by (E.164-formatted) phone.
-	 * Pass `{ skipPhoneNumberValidation: true }` to bypass validation.
-	 */
+	/** Alias for get(value, "phone") with optional skipValidation */
 	public findByPhone!: (
 		phone: string,
 		query?: { skipPhoneNumberValidation?: boolean },
@@ -58,7 +60,12 @@ export default class Recipients extends Resource {
 		this.defineTimeout(null);
 		this.endpoints({
 			create: { path: "/recipients", method: "POST" },
-			get: { path: "/recipients/:recipientId", method: "GET" },
+			get: {
+				path: "/recipients/:recipientId",
+				altPath: "/recipients/:key/:value",
+				method: "GET",
+				queryParams: true,
+			},
 			findByName: { path: "/recipients/name/:name", method: "GET" },
 			findByPhone: { path: "/recipients/phone/:phone", method: "GET", queryParams: true },
 			update: { path: "/recipients/:recipientId", method: "PUT" },

@@ -18,9 +18,7 @@ export enum WebhookTriggerName {
 	WorkerDuty = "workerDuty",
 }
 
-/**
- * Trigger type pairing ID to its name
- */
+/** Trigger type pairing ID to its name */
 export type WebhookTriggerType =
 	| { triggerId: 0; triggerName: WebhookTriggerName.TaskStarted }
 	| { triggerId: 1; triggerName: WebhookTriggerName.TaskEta }
@@ -37,7 +35,9 @@ export type WebhookTriggerType =
 	| { triggerId: 13; triggerName: WebhookTriggerName.TaskCloned }
 	| { triggerId: 14; triggerName: WebhookTriggerName.SmsRecipientResponseMissed };
 
-/** Payload definitions under Webhook namespace */
+/**
+ * Payload definitions for each webhook trigger
+ */
 export namespace WebhookPayloads {
 	export interface ActionContext {
 		id: string;
@@ -55,12 +55,141 @@ export namespace WebhookPayloads {
 		workerId: string | null;
 	}
 
-	// Extend these payloads as needed per trigger
+	export interface TaskCreatedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskUpdatedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+			worker?: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskClonedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskAssignedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+			worker: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskUnassignedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskDeletedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskStartedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskFailedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskCompletedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+	}
+
+	export interface TaskDelayedPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+		delay: number;
+	}
+
+	export interface TaskETAPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+		etaSeconds: number;
+	}
+
+	export interface TaskArrivalPayload extends WebhookPayload {
+		data: {
+			task: Record<string, unknown>;
+		};
+		distance: number;
+	}
+
+	export interface WorkerCreatedPayload extends WebhookPayload {
+		data: {
+			worker: Record<string, unknown>;
+		};
+	}
+
+	export interface WorkerDeletedPayload extends WebhookPayload {
+		data: {
+			worker: Record<string, unknown>;
+		};
+	}
+
+	export interface WorkerDutyPayload extends WebhookPayload {
+		data: {
+			worker: Record<string, unknown>;
+		};
+		status: number;
+	}
+
+	export interface SMSRecipientOptOutPayload extends WebhookPayload {
+		recipient: {
+			id: string;
+			name: string;
+			phone: string;
+		};
+		timestamp: number;
+		SMS: string;
+		data: Record<string, unknown>;
+	}
+
+	export interface AutoDispatchJobCompletedPayload extends WebhookPayload {
+		data: {
+			dispatch: Record<string, unknown>;
+		};
+		dispatchId: string;
+	}
+
+	export interface TaskBatchCreateJobCompletedPayload extends WebhookPayload {
+		jobId: string;
+		status: string;
+		tasksReceived: number;
+		tasksCreated: number;
+		tasksErrored: number;
+		errors: Array<{
+			statusCode: number;
+			errorCode: number;
+			message: string;
+			cause: string;
+			taskData: Record<string, unknown>;
+		}>;
+		failedTasks: Array<Record<string, unknown>>;
+		newTasks: Array<Record<string, unknown>>;
+		newTasksWithWarnings: Array<Record<string, unknown>>;
+		data: Record<string, unknown>;
+	}
 }
 
-/**
- * Shape of a webhook to create
- */
+/** Shape of a webhook to create */
 export interface OnfleetWebhook {
 	trigger: WebhookTriggerType["triggerId"];
 	url: string;
@@ -68,9 +197,7 @@ export interface OnfleetWebhook {
 	threshold?: number;
 }
 
-/**
- * Basic webhook result
- */
+/** Basic webhook result */
 export interface WebhookResult {
 	count: number;
 	id: string;
@@ -78,35 +205,21 @@ export interface WebhookResult {
 	url: string;
 }
 
-/**
- * Extended webhook info
- */
+/** Extended webhook info */
 export interface GetWebhookResult extends WebhookResult {
 	isEnabled: boolean;
 }
 
-/**
- * Webhooks resource: create, list, and delete webhooks
- */
+/** Webhooks resource: create, list, and delete webhooks */
 export default class Webhooks extends Resource {
-	/**
-	 * Create a new webhook
-	 */
 	public create!: (webhook: OnfleetWebhook) => Promise<WebhookResult>;
-
-	/**
-	 * Retrieve all webhooks
-	 */
 	public get!: () => Promise<GetWebhookResult[]>;
-
-	/**
-	 * Delete a webhook by ID
-	 */
 	public deleteOne!: (id: string) => Promise<void>;
 
 	constructor(api: Api) {
 		super(api);
 		this.defineTimeout(null);
+
 		this.endpoints({
 			create: { path: "/webhooks", method: "POST" },
 			get: { path: "/webhooks", method: "GET" },

@@ -1,8 +1,6 @@
 import Resource, { Api } from "../resource.js";
 
-/**
- * Shape of an organization returned by Onfleet
- */
+/** Shape of an organization returned by Onfleet */
 export interface OnfleetOrganization {
 	id: string;
 	timeCreated: number;
@@ -15,9 +13,7 @@ export interface OnfleetOrganization {
 	delegatees: string[];
 }
 
-/**
- * Shape of a delegatee in an organization
- */
+/** Shape of a delegatee in an organization */
 export interface Delegatee {
 	id: string;
 	name: string;
@@ -26,15 +22,19 @@ export interface Delegatee {
 	country: string;
 }
 
-/**
- * Organization resource: fetch organization details
- */
+/** Organization resource: fetch organization details and insert tasks */
 export default class Organization extends Resource {
 	/**
 	 * Retrieve default organization details or by specific ID
-	 * @param id - Optional organization ID
+	 * - get() → GET /organization
+	 * - get(id) → GET /organizations/:orgId
 	 */
 	public get!: (id?: string) => Promise<OnfleetOrganization | Delegatee>;
+
+	/** Insert tasks under an organization (not in original client but available upstream)
+	 *  PUT /organizations/:orgId/insertTasks
+	 */
+	public insertTask!: (id: string, props: { tasks: string[] }) => Promise<OnfleetOrganization>;
 
 	constructor(api: Api) {
 		super(api);
@@ -44,6 +44,10 @@ export default class Organization extends Resource {
 				path: "/organizations/:orgId",
 				altPath: "/organization",
 				method: "GET",
+			},
+			insertTask: {
+				path: "/organizations/:orgId/insertTasks",
+				method: "PUT",
 			},
 		});
 	}

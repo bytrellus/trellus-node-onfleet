@@ -1,6 +1,6 @@
 import { MatchMetadata, OnfleetMetadata } from "../metadata.js";
 import Resource, { Api } from "../resource.js";
-import { CreateDestinationProps, OnfleetDestination } from "../resources/destinations.js";
+import { CreateDestinationProps, Location, OnfleetDestination } from "../resources/destinations.js";
 import { CreateRecipientProps, OnfleetRecipient } from "../resources/recipients.js";
 
 /** Keys for querying tasks (only “shortId” in this case) */
@@ -14,11 +14,28 @@ export enum TaskState {
 	Completed,
 }
 
+/** Value types for custom fields */
+export type TaskCustomFieldValue = boolean | number | string | string[];
+
+/** Definition of a custom field on a task */
+export interface TaskCustomField {
+	key: string;
+	value: TaskCustomFieldValue;
+}
+
 /** Simplified completion event */
 export interface CompletionEvent {
 	name: string;
 	time: number;
-	location?: [number, number];
+	location?: Location;
+}
+
+/** Requirements before completing a task */
+export interface TaskCompletionRequirements {
+	signature?: boolean;
+	notes?: boolean;
+	photo?: boolean;
+	minimumAge?: number;
 }
 
 /** Details for task completion */
@@ -26,12 +43,15 @@ export interface TaskCompletionDetails {
 	failureNotes?: string;
 	failureReason?: string;
 	events: CompletionEvent[];
+	actions?: any[];
 	time: number | null;
-	firstLocation?: [number, number];
-	lastLocation?: [number, number];
+	firstLocation?: Location;
+	lastLocation?: Location;
+	unavailableAttachments?: any[];
+	photoUploadIds?: string[];
+	signatureUploadId?: string | null;
 	notes?: string;
 	success?: boolean;
-	signatureUploadId?: string | null;
 }
 
 /** Barcode definitions */
@@ -44,7 +64,7 @@ export interface CapturedBarcode {
 	id: string;
 	symbology: string;
 	data: string;
-	location: [number, number];
+	location: Location;
 	time: number;
 	wasRequested: boolean;
 }
@@ -56,28 +76,85 @@ export type TaskContainer =
 	| { type: "TEAM"; team: string };
 
 /** Full OnfleetTask shape */
-export interface OnfleetTask extends OnfleetDestination {
+export interface OnfleetTask {
 	id: string;
 	state: TaskState;
 	creator: string;
 	organization: string;
 	executor: string;
 	container: TaskContainer;
+
+	destination: string | OnfleetDestination;
+	recipients: Array<OnfleetRecipient | string>;
 	metadata: OnfleetMetadata[];
-	recipients: OnfleetRecipient[];
+	notes?: string;
+
+	completeAfter?: number;
+	completeBefore?: number;
+	pickupTask: boolean;
+	quantity: number;
+	serviceTime?: number;
+
+	appearance?: any;
+	dependencies?: string[];
+	didAutoAssign?: boolean;
+	feedback?: any[];
+
+	identity?: {
+		failedScanCount: number;
+		checksum: null;
+	};
+	merchant?: string;
+	shortId?: string;
+
+	overrides?: {
+		recipientName?: string | null;
+		recipientNotes?: string | null;
+		recipientSkipSMSNotifications?: boolean;
+		useMerchantForProxy?: string | null;
+	};
+
+	timeCreated: number;
+	timeLastModified?: number;
+	trackingURL?: string;
+	trackingViewed?: boolean;
+	worker?: string | null;
+
+	requirements?: TaskCompletionRequirements;
+
 	completionDetails: TaskCompletionDetails;
-	barcodes?: { required: Barcode[]; captured: CapturedBarcode[] };
+
+	barcodes?: {
+		required: Barcode[];
+		captured: CapturedBarcode[];
+	};
+
+	customFields?: TaskCustomField[];
 }
 
 /** Props for creating a single task */
 export interface CreateTaskProps {
 	destination: string | CreateDestinationProps;
 	recipients: string[] | CreateRecipientProps[];
-	autoAssign?: Omit<Partial<Record<string, unknown>>, "teams">;
+	autoAssign?: Omit<TaskAutoAssignOptions, "teams" | "restrictAutoAssignmentToTeam">;
+	capacity?: number;
+	container?: TaskContainer;
+	completeAfter?: number;
+	completeBefore?: number;
 	dependencies?: string[];
+	executor?: string;
 	metadata?: OnfleetMetadata[];
+	merchant?: string;
 	notes?: string;
 	pickupTask?: boolean;
+	quantity?: number;
+	recipientName?: string;
+	recipientNotes?: string;
+	recipientSkipSMSNotifications?: boolean;
+	requirements?: TaskCompletionRequirements;
+	barcodes?: Barcode[];
+	serviceTime?: number;
+	customFields?: TaskCustomField[];
 }
 
 /** Props for batch task creation */
@@ -118,11 +195,22 @@ export interface UpdateTaskResult extends OnfleetTask {
 /** Automatically‐assign props/result */
 export interface AutomaticallyAssignTaskProps {
 	tasks: string[];
-	options?: Partial<Record<string, unknown>>;
+	options?: TaskAutoAssignOptions;
 }
 export interface AutomaticallyAssignTaskResult {
 	assignedTasksCount: number;
 	assignedTasks: Record<string, string>;
+}
+
+/** Options for auto-assigning tasks */
+export interface TaskAutoAssignOptions {
+	mode: string;
+	considerDependencies?: boolean;
+	excludedWorkerIds?: string[];
+	maxAssignedTaskCount?: number;
+	team?: string;
+	teams?: string[];
+	restrictAutoAssignmentToTeam?: boolean;
 }
 
 /**
@@ -185,13 +273,11 @@ export default class Tasks extends Resource {
 	constructor(api: Api) {
 		super(api);
 		this.defineTimeout(null);
-
 		this.endpoints({
 			create: { path: "/tasks", method: "POST" },
 			batchCreate: { path: "/tasks/batch", method: "POST" },
 			batchCreateAsync: { path: "/tasks/batch-async", method: "POST" },
 			getBatch: { path: "/tasks/batch/:batchId", method: "GET" },
-
 			get: {
 				path: "/tasks/:taskId",
 				altPath: "/tasks/all",
@@ -199,12 +285,10 @@ export default class Tasks extends Resource {
 				queryParams: true,
 			},
 			getByShortId: { path: "/tasks/shortId/:taskId", method: "GET" },
-
 			update: { path: "/tasks/:taskId", method: "PUT" },
 			forceComplete: { path: "/tasks/:taskId/complete", method: "POST" },
 			clone: { path: "/tasks/:taskId/clone", method: "POST" },
 			deleteOne: { path: "/tasks/:taskId", method: "DELETE" },
-
 			autoAssign: { path: "/tasks/autoAssign", method: "POST" },
 			matchMetadata: { path: "/tasks/metadata", method: "POST" },
 		});
