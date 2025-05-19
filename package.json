@@ -1,6 +1,6 @@
 {
 	"name": "trellus-node-onfleet",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "Trellus Fork of Onfleet's Node.js API Wrapper Package",
 	"main": "./dist/index.js",
 	"types": "./dist/index.d.ts",
