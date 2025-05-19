@@ -1,4 +1,4 @@
-import Resource, { Api } from "../resource";
+import Resource, { Api } from "@/resource.js";
 
 /**
  * The RoutePlan object returned by Onfleet

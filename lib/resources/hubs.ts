@@ -1,9 +1,9 @@
-import Resource, { Api } from "../resource";
+import Resource, { Api } from "@/resource.js";
 import {
 	OnfleetDestination as BaseDestination,
 	DestinationAddress,
 	Location,
-} from "./destinations";
+} from "@/resources/destinations.js";
 
 /**
  * Shape of a hub object returned by Onfleet

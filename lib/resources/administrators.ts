@@ -1,5 +1,5 @@
-import { MatchMetadata, OnfleetMetadata } from "../metadata";
-import Resource, { Api } from "../resource";
+import { MatchMetadata, OnfleetMetadata } from "@/metadata.js";
+import Resource, { Api } from "@/resource.js";
 
 export interface OnfleetAdmin {
 	email: string;

@@ -1,4 +1,4 @@
-import Resource, { Api } from "../resource";
+import Resource, { Api } from "@/resource.js";
 
 /**
  * Shape of an organization returned by Onfleet

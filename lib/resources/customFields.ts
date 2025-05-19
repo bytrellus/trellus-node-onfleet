@@ -1,4 +1,4 @@
-import Resource, { Api } from "../resource";
+import Resource, { Api } from "@/resource.js";
 
 /**
  * Defines the CRUD operations available on the CustomFields endpoint

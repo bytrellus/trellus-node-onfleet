@@ -1,6 +1,6 @@
+import { Api } from "@/resource.js";
 import { Buffer } from "buffer";
 import fetch from "node-fetch";
-import { Api } from "./resource";
 
 /**
  * Encoder for API key

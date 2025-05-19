@@ -1,4 +1,4 @@
-import methods from "./methods.js";
+import methods from "@/methods.js";
 
 /**
  * Defines the shape of the API client used by each resource

@@ -1,22 +1,22 @@
+import { LIMITER_DEFAULT_MAX_CONCURRENT, LIMITER_DEFAULT_MIN_TIME } from "@/constants.js";
+import { ValidationError } from "@/errors.js";
+import { Api } from "@/resource.js";
+import Admins from "@/resources/administrators.js";
+import Containers from "@/resources/containers.js";
+import CustomFields from "@/resources/customFields.js";
+import Destinations from "@/resources/destinations.js";
+import Hubs from "@/resources/hubs.js";
+import Organization from "@/resources/organization.js";
+import Recipients from "@/resources/recipients.js";
+import RouteOptimizations from "@/resources/routeOptimizations.js";
+import RoutePlans from "@/resources/routePlan.js";
+import Tasks from "@/resources/tasks.js";
+import Teams from "@/resources/teams.js";
+import Webhooks from "@/resources/webhooks.js";
+import Workers from "@/resources/workers.js";
+import { authenticate, encode } from "@/utils.js";
 import Bottleneck from "bottleneck";
-import packageData from "../package.json";
-import { LIMITER_DEFAULT_MAX_CONCURRENT, LIMITER_DEFAULT_MIN_TIME } from "./constants";
-import { ValidationError } from "./errors";
-import { Api } from "./resource";
-import Admins from "./resources/administrators";
-import Containers from "./resources/containers";
-import CustomFields from "./resources/customFields";
-import Destinations from "./resources/destinations";
-import Hubs from "./resources/hubs";
-import Organization from "./resources/organization";
-import Recipients from "./resources/recipients";
-import RouteOptimizations from "./resources/routeOptimizations";
-import RoutePlans from "./resources/routePlan";
-import Tasks from "./resources/tasks";
-import Teams from "./resources/teams";
-import Webhooks from "./resources/webhooks";
-import Workers from "./resources/workers";
-import { authenticate, encode } from "./utils";
+import packageData from "../package.json" with { type: "json" };
 
 /** Options for configuring Bottleneck rate limiter */
 export interface BottleneckOptions {

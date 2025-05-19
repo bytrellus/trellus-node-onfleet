@@ -1,4 +1,4 @@
-import Resource, { Api } from "../resource";
+import Resource, { Api } from "@/resource.js";
 
 /**
  * A single time slot for default schedules

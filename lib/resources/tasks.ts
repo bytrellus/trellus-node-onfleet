@@ -1,7 +1,7 @@
-import { MatchMetadata, OnfleetMetadata } from "../metadata";
-import Resource, { Api } from "../resource";
-import { CreateDestinationProps, OnfleetDestination } from "./destinations";
-import { CreateRecipientProps, OnfleetRecipient } from "./recipients";
+import { MatchMetadata, OnfleetMetadata } from "@/metadata.js";
+import Resource, { Api } from "@/resource.js";
+import { CreateDestinationProps, OnfleetDestination } from "@/resources/destinations.js";
+import { CreateRecipientProps, OnfleetRecipient } from "@/resources/recipients.js";
 
 /** Keys for querying tasks (only “shortId” in this case) */
 export type TaskQueryKey = "shortId";

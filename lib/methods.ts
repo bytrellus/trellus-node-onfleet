@@ -1,8 +1,8 @@
+import { HttpError, PermissionError, RateLimitError, ServiceError } from "@/errors.js";
+import Onfleet from "@/onfleet.js";
+import type { Api } from "@/resource.js";
+import * as util from "@/utils.js";
 import fetch, { Response } from "node-fetch";
-import { HttpError, PermissionError, RateLimitError, ServiceError } from "./errors";
-import Onfleet from "./onfleet";
-import type { Api } from "./resource";
-import * as util from "./utils";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 

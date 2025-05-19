@@ -1,6 +1,6 @@
-import Resource, { Api } from "../resource";
-import { Location } from "./destinations";
-import type { OnfleetTask } from "./tasks";
+import Resource, { Api } from "@/resource.js";
+import { Location } from "@/resources/destinations.js";
+import type { OnfleetTask } from "@/resources/tasks.js";
 
 /**
  * Representation of an Onfleet Team

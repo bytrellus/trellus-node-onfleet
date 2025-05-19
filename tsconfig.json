@@ -1,22 +1,30 @@
 {
 	"compilerOptions": {
 		"target": "es2020",
-		"module": "node16",
-		"moduleResolution": "node16",
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
 		"esModuleInterop": true,
 		"outDir": "./dist",
+		"rootDir": "./lib",
 		"strict": true,
 		"types": ["node"],
 		"resolveJsonModule": true,
 		"declaration": true,
-		"allowSyntheticDefaultImports": true
+		"allowSyntheticDefaultImports": true,
+		"sourceMap": true,
+		"stripInternal": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["lib/*"]
+		}
 	},
-	"include": ["lib/**/*", "test/**/*"],
+	"include": ["lib/**/*"],
+	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],
 	"ts-node": {
 		"esm": true,
 		"transpileOnly": true,
 		"compilerOptions": {
-			"module": "ESNext"
+			"module": "NodeNext"
 		}
 	}
 }
