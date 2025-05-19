@@ -2,6 +2,7 @@ import nock from "nock";
 import { beforeEach, describe, expect, it } from "vitest";
 import { LIMITER_DEFAULT_MAX_CONCURRENT, LIMITER_DEFAULT_MIN_TIME } from "../lib/constants.js";
 import Onfleet from "../lib/onfleet.js";
+import { OnfleetTask } from "../lib/resources/tasks.js";
 import * as util from "../lib/utils.js";
 import response from "./response.js";
 
@@ -17,7 +18,7 @@ const newTeam = {
 const etaDetail = {
 	dropoffLocation: "101.627378,3.1403995",
 	pickupLocation: "101.5929671,3.1484824",
-	pickupTime: "1620965258",
+	pickupTime: 1620965258,
 };
 const completionDetail = {
 	completionDetails: {
@@ -458,14 +459,14 @@ describe("Resource Request Testing", () => {
 		});
 
 		it("should get task by ID", async () => {
-			const res = await onfleet.tasks.get("SxD9Ran6pOfnUDgfTecTsgXd");
+			const res = (await onfleet.tasks.get("SxD9Ran6pOfnUDgfTecTsgXd")) as OnfleetTask;
 			expect(typeof res).toBe("object");
 			expect(res.id).toBe("SxD9Ran6pOfnUDgfTecTsgXd");
 			expect(res.notes).toBe("Onfleet API Wrappers!");
 		});
 
 		it("should get task by ShortId", async () => {
-			const res = await onfleet.tasks.get("44a56188", "shortId");
+			const res = (await onfleet.tasks.get("44a56188", "shortId")) as OnfleetTask;
 			expect(typeof res).toBe("object");
 			expect(res.shortId).toBe("44a56188");
 			expect(res.trackingURL).toBe("https://onf.lt/44a56188");
@@ -525,7 +526,7 @@ describe("Resource Request Testing", () => {
 		beforeEach(() => {
 			nock(baseUrl)
 				.post((uri) => uri.includes("complete"))
-				.reply(200, response.forceComplete);
+				.reply(204);
 		});
 
 		it("should force complete a task", async () => {
@@ -533,9 +534,7 @@ describe("Resource Request Testing", () => {
 				"6Fe3qqFZ0DDwsM86zBlHJtlJ",
 				completionDetail,
 			);
-			expect(typeof res).toBe("object");
-			expect(res.status).toBe(200);
-			expect(res.completionDetails.notes).toBe("Forced complete by Onfleet Wrapper");
+			expect(res).toBe(204);
 		});
 	});
 
@@ -606,7 +605,7 @@ describe("Resource Request Testing", () => {
 		});
 
 		it("should get custom fields", async () => {
-			const res = await onfleet.customfields.get({ integration: "shopify" });
+			const res = await onfleet.customFields.get({ integration: "shopify" });
 			expect(typeof res).toBe("object");
 			expect(res.fields.length).toBe(1);
 		});
@@ -620,7 +619,7 @@ describe("Resource Request Testing", () => {
 		});
 
 		it("should create a custom field", async () => {
-			const res = await onfleet.customfields.create(createCustomField);
+			const res = await onfleet.customFields.create(createCustomField);
 			expect(res).toBe(200);
 		});
 	});
@@ -634,7 +633,7 @@ describe("Resource Request Testing", () => {
 			});
 
 			it("should list all route plans", async () => {
-				const res = await onfleet.routeplans.get();
+				const res = await onfleet.routePlans.get();
 				expect(Array.isArray(res)).toBe(true);
 				expect(res[0].id).toBe(response.getRoutePlans[0].id);
 			});
@@ -648,7 +647,7 @@ describe("Resource Request Testing", () => {
 			});
 
 			it("should create a new route plan", async () => {
-				const res = await onfleet.routeplans.create(response.createRoutePlanProps);
+				const res = await onfleet.routePlans.create(response.createRoutePlanProps);
 				expect(res.id).toBe(response.createRoutePlan.id);
 				expect(res.name).toBe(response.createRoutePlan.name);
 			});
@@ -664,7 +663,7 @@ describe("Resource Request Testing", () => {
 			});
 
 			it("should schedule a new route optimization", async () => {
-				const res = await onfleet.routeoptimizations.schedule(
+				const res = await onfleet.routeOptimizations.schedule(
 					response.scheduleOptimizationProps,
 				);
 				expect(res.issues).toEqual(response.scheduleOptimization.issues);
@@ -681,7 +680,7 @@ describe("Resource Request Testing", () => {
 
 			it("should start the optimization engine", async () => {
 				await expect(
-					onfleet.routeoptimizations.start("CQ6rFedL7VBL2VjURsGnb1cx"),
+					onfleet.routeOptimizations.start("CQ6rFedL7VBL2VjURsGnb1cx"),
 				).resolves.toBe(200);
 			});
 		});

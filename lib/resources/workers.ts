@@ -135,7 +135,10 @@ export default class Workers extends Resource {
 	public getSchedule!: (id: string) => Promise<ScheduleEntries>;
 	public setSchedule!: (id: string, schedule: ScheduleEntries) => Promise<ScheduleEntries>;
 	public insertTask!: (id: string, props: { tasks: string[] }) => Promise<OnfleetWorker>;
-	public getTasks!: (id: string, query?: GetWorkerTasksQueryProps) => Promise<OnfleetTask[]>;
+	public getTasks!: (
+		id: string,
+		query?: GetWorkerTasksQueryProps,
+	) => Promise<{ tasks: OnfleetTask[] }>;
 	public matchMetadata!: MatchMetadata<OnfleetWorker["metadata"]>;
 	public update!: (id: string, props: UpdateWorkerProps) => Promise<OnfleetWorker>;
 

@@ -1,9 +1,11 @@
 import Bottleneck from "bottleneck";
+// prettier-ignore start
 import packageData from "../package.json" with { type: "json" };
+// prettier-ignore end
 import { LIMITER_DEFAULT_MAX_CONCURRENT, LIMITER_DEFAULT_MIN_TIME } from "./constants.js";
 import { ValidationError } from "./errors.js";
 import { Api } from "./resource.js";
-import Admins from "./resources/administrators.js";
+import Administrators from "./resources/administrators.js";
 import Containers from "./resources/containers.js";
 import CustomFields from "./resources/customFields.js";
 import Destinations from "./resources/destinations.js";
@@ -20,19 +22,25 @@ import { authenticate, encode } from "./utils.js";
 
 /** Options for configuring Bottleneck rate limiter */
 export interface BottleneckOptions {
+	/** Maximum concurrent requests (min 1, max 20) */
 	maxConcurrent?: number;
+	/** Minimum time between requests in ms (min 50) */
 	minTime?: number;
 }
 
-/**
- * Constructor options for Onfleet client
- */
+/** Onfleet client configuration options */
 export interface OnfleetOptions {
+	/** Onfleet API key */
 	apiKey: string;
+	/** HTTP timeout in ms, must be <= DEFAULT_TIMEOUT */
 	userTimeout?: number;
+	/** Bottleneck rate-limiter settings */
 	bottleneckOptions?: BottleneckOptions | null;
+	/** Override base URL (default: https://onfleet.com) */
 	baseURL?: string;
+	/** Override default API path (default: /api) */
 	defaultPath?: string;
+	/** Override API version (default: /v2) */
 	defaultApiVersion?: string;
 }
 
@@ -42,37 +50,32 @@ const DEFAULT_API_VERSION = "/v2";
 const DEFAULT_TIMEOUT = 70000;
 const { name, version } = packageData;
 
-// Map of resource constructors
-const resources = {
-	Admins,
-	Administrators: Admins,
-	Containers,
-	Destinations,
-	Hubs,
-	Organization,
-	Recipients,
-	Tasks,
-	Teams,
-	Webhooks,
-	CustomFields,
-	Workers,
-	RoutePlans,
-	RouteOptimizations,
-} as const;
-
-/**
- * Main client class for Onfleet API
- */
+/** Main client class for Onfleet API */
 export default class Onfleet {
-	// Shared rate limiter for all instances
+	/** Shared Bottleneck limiter for all instances */
 	public static limiter = new Bottleneck({
 		maxConcurrent: LIMITER_DEFAULT_MAX_CONCURRENT,
 		minTime: LIMITER_DEFAULT_MIN_TIME,
 	});
 
+	public administrators: Administrators;
+	public admins: Administrators;
+	public containers: Containers;
+	public destinations: Destinations;
+	public hubs: Hubs;
+	public organization: Organization;
+	public recipients: Recipients;
+	public tasks: Tasks;
+	public teams: Teams;
+	public webhooks: Webhooks;
+	public workers: Workers;
+	public customFields: CustomFields;
+	public routePlans: RoutePlans;
+	public routeOptimizations: RouteOptimizations;
+
+	/** Raw API configuration */
 	private api: Api;
 	private headers: Record<string, string> = {};
-	[key: string]: any;
 
 	constructor({
 		apiKey,
@@ -107,12 +110,21 @@ export default class Onfleet {
 			this.initBottleneckOptions(bottleneckOptions);
 		}
 
-		this.initResources();
-	}
-
-	/** Current custom headers added to requests */
-	public get customHeaders(): Record<string, string> {
-		return this.headers;
+		// Instantiate all resources
+		this.administrators = new Administrators(this.api);
+		this.admins = this.administrators;
+		this.containers = new Containers(this.api);
+		this.customFields = new CustomFields(this.api);
+		this.destinations = new Destinations(this.api);
+		this.hubs = new Hubs(this.api);
+		this.organization = new Organization(this.api);
+		this.recipients = new Recipients(this.api);
+		this.tasks = new Tasks(this.api);
+		this.teams = new Teams(this.api);
+		this.webhooks = new Webhooks(this.api);
+		this.workers = new Workers(this.api);
+		this.routePlans = new RoutePlans(this.api);
+		this.routeOptimizations = new RouteOptimizations(this.api);
 	}
 
 	/** Override or add custom headers on the fly */
@@ -121,35 +133,30 @@ export default class Onfleet {
 		this.api.headers = { ...this.api.headers, ...headers };
 	}
 
-	/** Configure Bottleneck rate-limiter settings */
-	private initBottleneckOptions(opts: BottleneckOptions): void {
-		const LIMITER_HIGHEST_MAX_CONCURRENT = 20;
-		const LIMITER_LOWEST_MIN_TIME = 50;
-
-		if (opts.maxConcurrent !== undefined) {
-			const mc = Number(opts.maxConcurrent);
-			if (!Number.isNaN(mc) && mc > 0 && mc < LIMITER_HIGHEST_MAX_CONCURRENT) {
-				Onfleet.limiter.updateSettings({ maxConcurrent: mc });
-			}
-		}
-		if (opts.minTime !== undefined) {
-			const mt = Number(opts.minTime);
-			if (!Number.isNaN(mt) && mt > LIMITER_LOWEST_MIN_TIME) {
-				Onfleet.limiter.updateSettings({ minTime: mt });
-			}
-		}
-	}
-
-	/** Instantiate all resource clients on this instance */
-	private initResources(): void {
-		for (const [name, ResourceClass] of Object.entries(resources)) {
-			const endpoint = name.toLowerCase();
-			this[endpoint] = new ResourceClass(this.api);
-		}
+	/** Current custom headers */
+	public get customHeaders(): Record<string, string> {
+		return this.headers;
 	}
 
 	/** Validate API key by pinging auth endpoint */
 	public async verifyKey(): Promise<boolean> {
 		return authenticate(this.api);
+	}
+
+	/** Configure Bottleneck rate-limiter settings */
+	private initBottleneckOptions(opts: BottleneckOptions): void {
+		const MAX_CONCURRENT_LIMIT = 20;
+		const MIN_TIME_LIMIT = 50;
+
+		if (
+			opts.maxConcurrent !== undefined &&
+			opts.maxConcurrent > 0 &&
+			opts.maxConcurrent < MAX_CONCURRENT_LIMIT
+		) {
+			Onfleet.limiter.updateSettings({ maxConcurrent: opts.maxConcurrent });
+		}
+		if (opts.minTime !== undefined && opts.minTime > MIN_TIME_LIMIT) {
+			Onfleet.limiter.updateSettings({ minTime: opts.minTime });
+		}
 	}
 }
