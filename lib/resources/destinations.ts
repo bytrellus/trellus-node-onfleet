@@ -1,5 +1,5 @@
-import { OnfleetMetadata } from "@/metadata.js";
-import Resource, { Api } from "@/resource.js";
+import { OnfleetMetadata } from "../metadata.js";
+import Resource, { Api } from "../resource.js";
 
 /**
  * A longitude/latitude tuple

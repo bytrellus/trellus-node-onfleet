@@ -1,4 +1,4 @@
-import Resource, { Api } from "@/resource.js";
+import Resource, { Api } from "../resource.js";
 
 /** Possible webhook triggers */
 export enum WebhookTriggerName {

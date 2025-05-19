@@ -49,6 +49,11 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js",
 			"default": "./dist/index.js"
+		},
+		"./resources/*": {
+			"types": "./dist/resources/*.d.ts",
+			"import": "./dist/resources/*.js",
+			"default": "./dist/resources/*.js"
 		}
 	}
 }

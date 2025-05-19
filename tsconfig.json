@@ -13,10 +13,7 @@
 		"allowSyntheticDefaultImports": true,
 		"sourceMap": true,
 		"stripInternal": true,
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["lib/*"]
-		}
+		"baseUrl": "."
 	},
 	"include": ["lib/**/*"],
 	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"],

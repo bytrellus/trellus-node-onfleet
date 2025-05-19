@@ -1,7 +1,7 @@
-import { MatchMetadata, OnfleetMetadata } from "@/metadata.js";
-import Resource, { Api } from "@/resource.js";
-import { Location } from "@/resources/destinations.js";
-import type { OnfleetTask } from "@/resources/tasks.js";
+import { MatchMetadata, OnfleetMetadata } from "../metadata.js";
+import Resource, { Api } from "../resource.js";
+import { Location } from "../resources/destinations.js";
+import type { OnfleetTask } from "../resources/tasks.js";
 
 /**
  * Vehicle information for a worker
