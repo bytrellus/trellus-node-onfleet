@@ -53,29 +53,31 @@ export interface TaskCompletionRequirements {
 
 /** Details recorded when force-completing a task */
 export interface TaskCompletionDetails {
-	/** Notes when it failed (empty string if none) */
+	/** Notes (empty string if none). */
+	notes: string;
+	/** Notes when it failed (empty string if none). */
 	failureNotes: string;
-	/** Notes when it succeeded (empty string if none) */
+	/** Notes when it succeeded (empty string if none). */
 	successNotes: string;
-	/** “NONE” or other reason code */
+	/** “NONE” or other failure reason code. */
 	failureReason: string;
 	/** Collected events */
 	events: CompletionEvent[];
-	/** Any actions taken at completion */
+	/** Any actions taken */
 	actions: any[];
-	/** Timestamp (ms) or null if not done */
+	/** Timestamp (ms) when completion occurred, or null if not done. */
 	time: number | null;
-	/** Upload ID or null */
+	/** Signature upload ID, or null if not provided. */
 	signatureUploadId: string | null;
-	/** Single-photo upload ID or null */
+	/** Single-photo upload ID, or null if not provided. */
 	photoUploadId: string | null;
-	/** Multi-photo upload IDs or null */
+	/** Multi-photo upload IDs, or null if not provided. */
 	photoUploadIds: string[] | null;
-	/** First location coords or empty array */
+	/** First recorded location coords, or empty array. */
 	firstLocation: number[];
-	/** Last location coords or empty array */
+	/** Last recorded location coords, or empty array. */
 	lastLocation: number[];
-	/** Any attachments that couldn't be retrieved */
+	/** Any attachments that couldn't be retrieved. */
 	unavailableAttachments: any[];
 }
 
@@ -83,17 +85,23 @@ export interface TaskCompletionDetails {
 export interface Barcode {
 	/** Block non-required scans. */
 	blockCompletion?: boolean;
-	/** Data string to match. */
+	/** Data string to match against scans. */
 	data?: string;
 }
 
 /** A barcode actually captured at completion */
 export interface CapturedBarcode {
+	/** Unique scan ID. */
 	id: string;
+	/** Symbology identifier (e.g. "CODE128"). */
 	symbology: string;
+	/** Data captured from the scan. */
 	data: string;
+	/** Geographic location of the scan. */
 	location: Location;
+	/** Timestamp in Unix ms when scan occurred. */
 	time: number;
+	/** Whether this barcode was requested. */
 	wasRequested: boolean;
 }
 
@@ -115,74 +123,74 @@ export interface OnfleetTask {
 	id: string;
 	/** Numeric state code. */
 	state: TaskState;
-	/** Who created it. */
+	/** ID of the user or process who created the task. */
 	creator: string;
-	/** Owning organization. */
+	/** Owning organization ID. */
 	organization: string;
-	/** Responsible/executor org. */
+	/** Executor (responsible) organization ID. */
 	executor: string;
-	/** Which container holds this task. */
+	/** Container holding this task (org, team or worker). */
 	container: TaskContainer;
 
-	/** Destination ID or embedded object. */
+	/** Destination ID or embedded destination object. */
 	destination: string | OnfleetDestination;
-	/** Recipient IDs or embedded objects. */
+	/** Recipient IDs or embedded recipient objects. */
 	recipients: Array<OnfleetRecipient | string>;
-	/** Free-form metadata. */
+	/** Free-form metadata attached to this task. */
 	metadata: OnfleetMetadata[];
-	/** Optional notes. */
+	/** Optional notes describing the task. */
 	notes?: string;
 
-	/** Earliest allowed finish time (ms since epoch). */
+	/** Earliest allowed completion timestamp (ms since epoch). */
 	completeAfter?: number;
-	/** Latest allowed finish time (ms since epoch). */
+	/** Latest allowed completion timestamp (ms since epoch). */
 	completeBefore?: number;
-	/** True for pickup tasks. */
+	/** True for pickup tasks, false for drop-off tasks. */
 	pickupTask: boolean;
-	/** Units to drop/pickup (for routing). */
+	/** Quantity of units to pick up or drop off (routing). */
 	quantity: number;
-	/** Minutes on-site (for routing). */
+	/** Service time in minutes on-site (routing). */
 	serviceTime?: number;
 
-	/** Visual pin options. */
+	/** Visual pin options for maps. */
 	appearance?: Appearance;
-	/** IDs of tasks that must finish first. */
+	/** IDs of tasks that must finish before this one. */
 	dependencies?: string[];
-	/** True if autoAssign succeeded. */
+	/** True if auto-assign succeeded. */
 	didAutoAssign?: boolean;
-	/** Any recipient feedback. */
+	/** Any feedback provided by recipients. */
 	feedback?: any[];
-	/** If part of a route plan, its ID here. */
+	/** Route plan ID, if part of a route. */
 	routePlan?: string;
 
-	/** Overridden merchant, if any. */
+	/** Overridden merchant org ID, if any. */
 	merchant?: string;
-	/** Human-friendly short ID. */
+	/** Human-friendly short task ID. */
 	shortId?: string;
-	/** Live-tracking URL. */
+	/** URL for live-tracking this task. */
 	trackingURL?: string;
-	/** Has the tracking page been viewed? */
+	/** Whether the tracking page has been viewed. */
 	trackingViewed?: boolean;
-	/** ID of assigned worker. */
+	/** Assigned worker ID, or null if unassigned. */
 	worker?: string | null;
 
-	/** When it was created (ms since epoch). */
+	/** Creation timestamp (ms since epoch). */
 	timeCreated: number;
-	/** When it was last modified. */
+	/** Last modification timestamp (ms since epoch). */
 	timeLastModified?: number;
 
-	/** Task-level completion requirements. */
+	/** Completion requirements (signature, photo, notes, age). */
 	requirements?: TaskCompletionRequirements;
-	/** Actual completion details (events, success, etc). */
+	/** Actual completion details recorded on force complete. */
 	completionDetails: TaskCompletionDetails;
 
-	/** Barcode requirements & what was captured. */
+	/** Barcode requirements and captures. */
 	barcodes?: {
 		required: Barcode[];
 		captured: CapturedBarcode[];
 	};
 
-	/** Attached custom fields & values. */
+	/** Custom fields attached to this task. */
 	customFields?: TaskCustomField[];
 }
 
@@ -192,9 +200,9 @@ export interface CreateTaskProps {
 	destination: string | CreateDestinationProps;
 	/** Recipient IDs or full objects to auto-create. */
 	recipients: string[] | CreateRecipientProps[];
-	/** Merchant org to show in notifications. */
+	/** Merchant org ID to show in notifications. */
 	merchant?: string;
-	/** Executor org for fulfillment. */
+	/** Executor org ID for fulfillment. */
 	executor?: string;
 	/** Earliest completion timestamp (ms). */
 	completeAfter?: number;
@@ -202,55 +210,65 @@ export interface CreateTaskProps {
 	completeBefore?: number;
 	/** True = pickup; false = drop-off. */
 	pickupTask?: boolean;
-	/** Notes (max 10k chars). */
+	/** Notes (maximum 10,000 characters). */
 	notes?: string;
-	/** Automatic assignment options. */
+	/** Automatic assignment options (omit team restrictions). */
 	autoAssign?: Omit<TaskAutoAssignOptions, "teams" | "restrictAutoAssignmentToTeam">;
-	/** If you want a non-default container. */
+	/** Custom container for the task (org, team or worker). */
 	container?: TaskContainer;
-	/** Other task IDs that must complete first. */
+	/** IDs of tasks to complete before this one. */
 	dependencies?: string[];
-	/** Units for routing. */
+	/** Quantity of units for routing purposes. */
 	quantity?: number;
 	/** On-site time in minutes for routing. */
 	serviceTime?: number;
-	/** Override recipient name just for this task. */
+	/** Override recipient name for this task only. */
 	recipientName?: string;
-	/** Override recipient notes just for this task. */
+	/** Override recipient notes for this task only. */
 	recipientNotes?: string;
-	/** Override SMS settings for this task only. */
+	/** Override whether to skip SMS notifications for this recipient on this task only. */
 	recipientSkipSMSNotifications?: boolean;
-	/** Use merchant org for proxy notifications. */
+	/** Use merchant org ID for proxy notifications on this task only. */
 	useMerchantForProxy?: boolean;
-	/** Require signature/photo/notes/age. */
+	/** Set signature/photo/notes/age completion requirements. */
 	requirements?: TaskCompletionRequirements;
-	/** Block scanning non-required barcodes. */
+	/** Block scanning of non-required barcodes. */
 	scanOnlyRequiredBarcodes?: boolean;
-	/** Which barcodes to require. */
+	/** Barcode requirements array. */
 	barcodes?: Barcode[];
-	/** Pin appearance settings. */
+	/** Visual pin appearance settings. */
 	appearance?: Appearance;
-	/** Attach custom fields & values. */
+	/** Custom fields to attach. */
 	customFields?: TaskCustomField[];
-	/** Arbitrary metadata. */
+	/** Arbitrary metadata to attach. */
 	metadata?: OnfleetMetadata[];
 }
 
-/**
- * Properties you can pass to the Update Task endpoint.
- * Note: for active tasks you may update notes, metadata or container;
- * for completed tasks only metadata; and to change the destination
- * you must first update it via the Destinations API and then supply its ID here.
- */
+/** Properties for updating an existing task */
 export interface UpdateTaskProps {
-	/** Free-form notes (max 10 000 chars) */
+	/** Free-form notes (max 10,000 chars). */
 	notes?: string;
-	/** Arbitrary task metadata (will overwrite existing) */
+	/** Arbitrary metadata (will overwrite existing). */
 	metadata?: OnfleetMetadata[];
-	/** Move this task into a different container (org, team or worker) */
+	/** Move this task into a different container. */
 	container?: TaskContainer;
-	/** ID of an already-updated Destination to attach to this task */
+	/** Destination ID of an already-updated Destination object. */
 	destination?: string;
+	/** Earliest completion timestamp (ms since epoch). */
+	completeAfter?: number;
+	/** Latest completion timestamp (ms since epoch). */
+	completeBefore?: number;
+}
+
+/** Properties for force-completing an active task */
+export interface ForceCompleteTaskProps {
+	/** Object specifying completion status and notes. */
+	completionDetails: {
+		/** Whether the task's completion was successful. */
+		success: boolean;
+		/** Optional completion notes. */
+		notes?: string;
+	};
 }
 
 export interface ListTasksParams {
@@ -265,28 +283,28 @@ export interface ListTasksParams {
 	containers?: string;
 }
 
-/** Batch‐create (sync) parameters */
+/** Batch-create (sync) parameters */
 export interface CreateMultipleTasksProps {
 	tasks: CreateTaskProps[];
 }
-/** Sync batch‐create result */
+/** Sync batch-create result */
 export interface CreateMultipleTasksResult {
 	tasks: OnfleetTask[];
 }
-/** Async batch‐create result */
+/** Async batch-create result */
 export interface CreateAsyncMultipleTaskResult {
 	status: string;
 	jobId: string;
 }
 
-/** GET‐single adds ETA fields */
+/** GET-single adds ETA fields */
 export interface GetTaskResult extends OnfleetTask {
 	/** Estimated arrival (ms). */
 	eta: number | null;
 	/** Estimated completion (ms). */
 	estimatedCompletionTime: number | null;
 }
-/** GET‐many (list) response */
+/** GET-many (list) response */
 export interface GetManyTaskResult {
 	/** For paging—if present, use as lastId next call. */
 	lastId?: string;
@@ -325,8 +343,8 @@ export interface TaskAutoAssignOptions {
 	/** Exclude these workers. */
 	excludedWorkerIds?: string[];
 	/** Max tasks per worker. */
-	maxAssignedTaskCount?: number;
-	/** Include deps in calc. */
+	maxAssignedTaskCount?: string[];
+	/** Include dependencies in calculation. */
 	considerDependencies?: boolean;
 	/** For multi-assign: list of team IDs. */
 	teams?: string[];
@@ -358,13 +376,10 @@ export default class Tasks extends Resource {
 
 	/** Retrieve by short-ID */
 	public getByShortId!: (shortId: string) => Promise<OnfleetTask>;
-	/** Update notes/metadata or container on active tasks */
+	/** Update notes, metadata, container or destination on active tasks */
 	public update!: (id: string, props: UpdateTaskProps) => Promise<UpdateTaskResult>;
-	/** Force-complete a task */
-	public forceComplete!: (
-		id: string,
-		details: { completionDetails: { success: boolean; notes?: string } },
-	) => Promise<void>;
+	/** Force-complete an active task */
+	public forceComplete!: (id: string, props: ForceCompleteTaskProps) => Promise<void>;
 	/** Clone an existing task */
 	public clone!: (id: string) => Promise<OnfleetTask>;
 	/** Delete a task */
