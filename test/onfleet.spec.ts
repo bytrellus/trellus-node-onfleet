@@ -2,7 +2,6 @@ import nock from "nock";
 import { beforeEach, describe, expect, it } from "vitest";
 import { LIMITER_DEFAULT_MAX_CONCURRENT, LIMITER_DEFAULT_MIN_TIME } from "../lib/constants.js";
 import Onfleet from "../lib/onfleet.js";
-import { OnfleetTask } from "../lib/resources/tasks.js";
 import * as util from "../lib/utils.js";
 import response from "./response.js";
 
@@ -459,14 +458,14 @@ describe("Resource Request Testing", () => {
 		});
 
 		it("should get task by ID", async () => {
-			const res = (await onfleet.tasks.get("SxD9Ran6pOfnUDgfTecTsgXd")) as OnfleetTask;
+			const res = await onfleet.tasks.get("SxD9Ran6pOfnUDgfTecTsgXd");
 			expect(typeof res).toBe("object");
 			expect(res.id).toBe("SxD9Ran6pOfnUDgfTecTsgXd");
 			expect(res.notes).toBe("Onfleet API Wrappers!");
 		});
 
 		it("should get task by ShortId", async () => {
-			const res = (await onfleet.tasks.get("44a56188", "shortId")) as OnfleetTask;
+			const res = await onfleet.tasks.getByShortId("44a56188");
 			expect(typeof res).toBe("object");
 			expect(res.shortId).toBe("44a56188");
 			expect(res.trackingURL).toBe("https://onf.lt/44a56188");

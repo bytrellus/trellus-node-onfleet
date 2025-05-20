@@ -4,20 +4,42 @@ import Resource, { Api } from "../resource.js";
 /** A longitude/latitude tuple */
 export type Location = [number, number];
 
-/** Address properties for creating or updating a destination */
-export interface DestinationAddress {
-	apartment?: string;
-	city: string;
-	country: string;
-	name?: string;
-	number: string;
-	postalCode?: string;
-	state?: string;
-	street: string;
-	unparsed?: string;
+/** Language options for create */
+export interface DestinationOptions {
+	/** ISO-639 2-letter country/language code */
+	language?: string;
 }
 
-/** Shape of a destination object returned by Onfleet */
+/** Address properties for creating or updating a destination */
+// (you could swap this for a union ParsedAddress | UnparsedAddress if you want to mirror the docs strictly)
+export interface DestinationAddress {
+	/** A complete, unparsed address string — takes precedence if present */
+	unparsed?: string;
+	/** e.g. “Transamerica Pyramid” */
+	name?: string;
+	/** suite or apartment number */
+	apartment?: string;
+
+	/** These are required when you’re not using unparsed */
+	number: string;
+	street: string;
+	city: string;
+	country: string;
+	state?: string;
+	postalCode?: string;
+}
+
+/** Warnings the API may emit on create */
+export type DestinationAddressWarning =
+	/** The resulting address number is different than the input address number */
+	| "MISMATCH_NUMBER"
+	/** The resulting postal code is different than the input address postal code */
+	| "MISMATCH_POSTALCODE"
+	/** The address needs apartment number precision or additional inputs */
+	| "GEOMETRIC_CENTER"
+	/** The returned response from Google does not match all elements from the supplied address */
+	| "PARTIAL_MATCH";
+
 export interface OnfleetDestination {
 	id: string;
 	timeCreated: number;
@@ -34,6 +56,8 @@ export interface OnfleetDestination {
 	};
 	notes: string;
 	metadata: OnfleetMetadata[];
+	googlePlaceId: string | null;
+	warnings: DestinationAddressWarning[];
 }
 
 /** Properties for creating a new destination */
@@ -41,9 +65,11 @@ export interface CreateDestinationProps {
 	address: DestinationAddress;
 	location?: Location;
 	notes?: string;
+
+	/** new: language options */
+	options?: DestinationOptions;
 }
 
-/** Destinations resource: create, get, and metadata operations */
 export default class Destinations extends Resource {
 	/** Create a new destination */
 	public create!: (props: CreateDestinationProps) => Promise<OnfleetDestination>;

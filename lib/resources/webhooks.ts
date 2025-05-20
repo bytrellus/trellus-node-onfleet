@@ -16,6 +16,21 @@ export enum WebhookTriggerName {
 	TaskUnassigned = "taskUnassigned",
 	TaskUpdated = "taskUpdated",
 	WorkerDuty = "workerDuty",
+	WorkerCreated = "workerCreated",
+	WorkerDeleted = "workerDeleted",
+	SMSRecipientOptOut = "SMSRecipientOptOut",
+	AutoDispatchJobCompleted = "autoDispatchJobCompleted",
+	TaskBatchCreateJobCompleted = "taskBatchCreateJobCompleted",
+	RouteOptimizationJobCompleted = "routeOptimizationJobCompleted",
+	RoutePlanCreated = "routePlanCreated",
+	RoutePlanStarted = "routePlanStarted",
+	RoutePlanCompleted = "routePlanCompleted",
+	WorkerUpdated = "workerUpdated",
+	RoutePlanUpdated = "routePlanUpdated",
+	RoutePlanUnassigned = "routePlanUnassigned",
+	RoutePlanAssigned = "routePlanAssigned",
+	RoutePlanDelayed = "routePlanDelayed",
+	PredictedTaskDelay = "predictedTaskDelay",
 }
 
 /** Trigger type pairing ID to its name */
@@ -33,7 +48,22 @@ export type WebhookTriggerType =
 	| { triggerId: 10; triggerName: WebhookTriggerName.TaskUnassigned }
 	| { triggerId: 12; triggerName: WebhookTriggerName.TaskDelayed }
 	| { triggerId: 13; triggerName: WebhookTriggerName.TaskCloned }
-	| { triggerId: 14; triggerName: WebhookTriggerName.SmsRecipientResponseMissed };
+	| { triggerId: 14; triggerName: WebhookTriggerName.SmsRecipientResponseMissed }
+	| { triggerId: 15; triggerName: WebhookTriggerName.WorkerCreated }
+	| { triggerId: 16; triggerName: WebhookTriggerName.WorkerDeleted }
+	| { triggerId: 17; triggerName: WebhookTriggerName.SMSRecipientOptOut }
+	| { triggerId: 18; triggerName: WebhookTriggerName.AutoDispatchJobCompleted }
+	| { triggerId: 19; triggerName: WebhookTriggerName.TaskBatchCreateJobCompleted }
+	| { triggerId: 20; triggerName: WebhookTriggerName.RouteOptimizationJobCompleted }
+	| { triggerId: 22; triggerName: WebhookTriggerName.RoutePlanCreated }
+	| { triggerId: 23; triggerName: WebhookTriggerName.RoutePlanStarted }
+	| { triggerId: 24; triggerName: WebhookTriggerName.RoutePlanCompleted }
+	| { triggerId: 25; triggerName: WebhookTriggerName.WorkerUpdated }
+	| { triggerId: 26; triggerName: WebhookTriggerName.RoutePlanUpdated }
+	| { triggerId: 27; triggerName: WebhookTriggerName.RoutePlanUnassigned }
+	| { triggerId: 28; triggerName: WebhookTriggerName.RoutePlanAssigned }
+	| { triggerId: 29; triggerName: WebhookTriggerName.RoutePlanDelayed }
+	| { triggerId: 30; triggerName: WebhookTriggerName.PredictedTaskDelay };
 
 /**
  * Payload definitions for each webhook trigger
@@ -56,116 +86,78 @@ export namespace WebhookPayloads {
 	}
 
 	export interface TaskCreatedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 	}
 
 	export interface TaskUpdatedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-			worker?: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown>; worker?: Record<string, unknown> };
 	}
 
 	export interface TaskClonedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 	}
 
 	export interface TaskAssignedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-			worker: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown>; worker: Record<string, unknown> };
 	}
 
 	export interface TaskUnassignedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 	}
 
 	export interface TaskDeletedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 	}
 
 	export interface TaskStartedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 	}
 
 	export interface TaskFailedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 	}
 
 	export interface TaskCompletedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 	}
 
 	export interface TaskDelayedPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 		delay: number;
 	}
 
 	export interface TaskETAPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 		etaSeconds: number;
 	}
 
 	export interface TaskArrivalPayload extends WebhookPayload {
-		data: {
-			task: Record<string, unknown>;
-		};
+		data: { task: Record<string, unknown> };
 		distance: number;
 	}
 
 	export interface WorkerCreatedPayload extends WebhookPayload {
-		data: {
-			worker: Record<string, unknown>;
-		};
+		data: { worker: Record<string, unknown> };
 	}
 
 	export interface WorkerDeletedPayload extends WebhookPayload {
-		data: {
-			worker: Record<string, unknown>;
-		};
+		data: { worker: Record<string, unknown> };
 	}
 
 	export interface WorkerDutyPayload extends WebhookPayload {
-		data: {
-			worker: Record<string, unknown>;
-		};
+		data: { worker: Record<string, unknown> };
 		status: number;
 	}
 
 	export interface SMSRecipientOptOutPayload extends WebhookPayload {
-		recipient: {
-			id: string;
-			name: string;
-			phone: string;
-		};
+		recipient: { id: string; name: string; phone: string };
 		timestamp: number;
 		SMS: string;
 		data: Record<string, unknown>;
 	}
 
 	export interface AutoDispatchJobCompletedPayload extends WebhookPayload {
-		data: {
-			dispatch: Record<string, unknown>;
-		};
+		data: { dispatch: Record<string, unknown> };
 		dispatchId: string;
 	}
 
@@ -186,6 +178,54 @@ export namespace WebhookPayloads {
 		newTasks: Array<Record<string, unknown>>;
 		newTasksWithWarnings: Array<Record<string, unknown>>;
 		data: Record<string, unknown>;
+	}
+
+	export interface RouteOptimizationJobCompletedPayload extends WebhookPayload {
+		data: Record<string, unknown>;
+		dispatchId: string;
+	}
+
+	export interface RoutePlanCreatedPayload extends WebhookPayload {
+		routePlanId: string;
+		data: { routePlan: Record<string, unknown> };
+	}
+
+	export interface RoutePlanStartedPayload extends WebhookPayload {
+		routePlanId: string;
+		data: { routePlan: Record<string, unknown> };
+	}
+
+	export interface RoutePlanCompletedPayload extends WebhookPayload {
+		routePlanId: string;
+		data: { routePlan: Record<string, unknown> };
+	}
+
+	export interface WorkerUpdatedPayload extends WebhookPayload {
+		data: { worker: Record<string, unknown> };
+	}
+
+	export interface RoutePlanUpdatedPayload extends WebhookPayload {
+		routePlanId: string;
+		data: { routePlan: Record<string, unknown> };
+	}
+
+	export interface RoutePlanUnassignedPayload extends WebhookPayload {
+		routePlanId: string;
+		data: { routePlan: Record<string, unknown> };
+	}
+
+	export interface RoutePlanAssignedPayload extends WebhookPayload {
+		routePlanId: string;
+		data: { routePlan: Record<string, unknown> };
+	}
+
+	export interface RoutePlanDelayedPayload extends WebhookPayload {
+		routePlanId: string;
+		// no additional data beyond timing
+	}
+
+	export interface PredictedTaskDelayPayload extends WebhookPayload {
+		data: { task: Record<string, unknown>; delayTime: number };
 	}
 }
 
