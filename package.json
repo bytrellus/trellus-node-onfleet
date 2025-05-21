@@ -5,11 +5,12 @@
 	"main": "./dist/cjs/index.js",
 	"module": "./dist/esm/index.js",
 	"types": "./dist/types/index.d.ts",
+	"type": "module",
 	"scripts": {
 		"build": "npm run build:esm && npm run build:cjs && npm run create-package-files",
 		"build:esm": "tsc --project tsconfig.esm.json",
 		"build:cjs": "tsc --project tsconfig.cjs.json",
-		"create-package-files": "if not exist dist\\cjs mkdir dist\\cjs && if not exist dist\\esm mkdir dist\\esm && echo {\"type\":\"commonjs\"} > dist\\cjs\\package.json && echo {\"type\":\"module\"} > dist\\esm\\package.json",
+		"create-package-files": "node scripts/create-package-files.js",
 		"lint": "eslint 'lib/**/*.ts'",
 		"test": "vitest run",
 		"prepare": "npm run build"
@@ -34,10 +35,11 @@
 	],
 	"dependencies": {
 		"bottleneck": "^2.19.5",
-		"node-fetch": "^3.3.2"
+		"node-fetch": "^2.6.7"
 	},
 	"devDependencies": {
 		"@types/node": "^20.0.0",
+		"@types/node-fetch": "^2.6.4",
 		"eslint": "^8.0.0",
 		"nock": "^13.5.5",
 		"ts-node": "^10.9.1",

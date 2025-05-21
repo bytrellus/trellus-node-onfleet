@@ -1,5 +1,21 @@
 import { Buffer } from "buffer";
-import fetch from "node-fetch";
+let fetch: any;
+
+async function loadDependencies() {
+	try {
+		const nodeFetch = require("node-fetch");
+		fetch = nodeFetch.default || nodeFetch;
+	} catch (e) {
+		const module = await import("node-fetch");
+		fetch = module.default;
+	}
+}
+
+let fetchInitialized = false;
+let fetchInitializationPromise = loadDependencies().then(() => {
+	fetchInitialized = true;
+});
+
 import { Api } from "./resource.js";
 
 /**
@@ -17,6 +33,10 @@ export function encode(apiKey: string): string {
  * @param api - API client config
  */
 export async function authenticate(api: Api): Promise<boolean> {
+	if (!fetchInitialized) {
+		await fetchInitializationPromise;
+	}
+
 	const url = `${api.baseUrl}/auth/test`;
 	try {
 		const res = await fetch(url, {

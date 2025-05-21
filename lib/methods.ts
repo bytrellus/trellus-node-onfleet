@@ -1,4 +1,23 @@
-import fetch, { Response } from "node-fetch";
+let fetch: any;
+
+async function loadDependencies() {
+	try {
+		// Try CommonJS-style require first
+		const nodeFetch = require("node-fetch");
+		fetch = nodeFetch.default || nodeFetch;
+	} catch (e) {
+		// Fall back to ESM import if required
+		const module = await import("node-fetch");
+		fetch = module.default;
+	}
+}
+
+// Initialize fetch before it's used
+let fetchInitialized = false;
+let fetchInitializationPromise = loadDependencies().then(() => {
+	fetchInitialized = true;
+});
+
 import { HttpError, PermissionError, RateLimitError, ServiceError } from "./errors.js";
 import Onfleet from "./onfleet.js";
 import type { Api } from "./resource.js";
@@ -26,6 +45,11 @@ export interface MethodFunction {
  *      applying rate limiting and error mapping.
  */
 const Methods: MethodFunction = async (config, api, ...args): Promise<unknown> => {
+	// Ensure fetch is initialized before using it
+	if (!fetchInitialized) {
+		await fetchInitializationPromise;
+	}
+
 	const {
 		path,
 		altPath,
@@ -124,7 +148,7 @@ const Methods: MethodFunction = async (config, api, ...args): Promise<unknown> =
 
 	try {
 		// Schedule request through Bottleneck
-		const response: Response = await Onfleet.limiter.schedule(() =>
+		const response: any = await Onfleet.limiter.schedule(() =>
 			fetch(url, {
 				method: operation,
 				headers: api.headers,
