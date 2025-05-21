@@ -1,7 +1,4 @@
 import Bottleneck from "bottleneck";
-// prettier-ignore start
-import packageData from "../package.json" with { type: "json" };
-// prettier-ignore end
 import { LIMITER_DEFAULT_MAX_CONCURRENT, LIMITER_DEFAULT_MIN_TIME } from "./constants.js";
 import { ValidationError } from "./errors.js";
 import { Api } from "./resource.js";
@@ -48,7 +45,6 @@ const DEFAULT_URL = "https://onfleet.com";
 const DEFAULT_PATH = "/api";
 const DEFAULT_API_VERSION = "/v2";
 const DEFAULT_TIMEOUT = 70000;
-const { name, version } = packageData;
 
 /** Main client class for Onfleet API */
 export default class Onfleet {
@@ -101,7 +97,7 @@ export default class Onfleet {
 			timeout: userTimeout,
 			headers: {
 				"Content-Type": "application/json",
-				"User-Agent": `${name}-${version}`,
+				"User-Agent": `trellus-node-onfleet`,
 				Authorization: `Basic ${encode(apiKey)}`,
 			},
 		};

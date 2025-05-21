@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+	  "target": "es2020",
+	  "esModuleInterop": true,
+	  "strict": true,
+	  "types": ["node"],
+	  "resolveJsonModule": true,
+	  "declaration": true,
+	  "allowSyntheticDefaultImports": true,
+	  "sourceMap": true,
+	  "stripInternal": true,
+	  "baseUrl": ".",
+	  "rootDir": "./lib"
+	},
+	"include": ["lib/**/*"],
+	"exclude": ["node_modules", "dist", "**/*.test.ts", "**/*.spec.ts"]
+  }

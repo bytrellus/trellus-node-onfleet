@@ -1,12 +1,16 @@
 {
 	"name": "trellus-node-onfleet",
-	"version": "1.0.10",
+	"version": "1.0.12",
 	"description": "Trellus Fork of Onfleet's Node.js API Wrapper Package",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "./dist/cjs/index.js",
+	"module": "./dist/esm/index.js",
+	"types": "./dist/types/index.d.ts",
 	"scripts": {
-		"build": "tsc --project tsconfig.json",
-		"lint": "eslint 'src/**/*.ts'",
+		"build": "npm run build:esm && npm run build:cjs && npm run create-package-files",
+		"build:esm": "tsc --project tsconfig.esm.json",
+		"build:cjs": "tsc --project tsconfig.cjs.json",
+		"create-package-files": "if not exist dist\\cjs mkdir dist\\cjs && if not exist dist\\esm mkdir dist\\esm && echo {\"type\":\"commonjs\"} > dist\\cjs\\package.json && echo {\"type\":\"module\"} > dist\\esm\\package.json",
+		"lint": "eslint 'lib/**/*.ts'",
 		"test": "vitest run",
 		"prepare": "npm run build"
 	},
@@ -25,7 +29,6 @@
 	],
 	"license": "MIT",
 	"homepage": "https://onfleet.com/",
-	"type": "module",
 	"files": [
 		"dist"
 	],
@@ -46,14 +49,16 @@
 	},
 	"exports": {
 		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js",
-			"default": "./dist/index.js"
+			"types": "./dist/types/index.d.ts",
+			"import": "./dist/esm/index.js",
+			"require": "./dist/cjs/index.js",
+			"default": "./dist/cjs/index.js"
 		},
 		"./resources/*": {
-			"types": "./dist/resources/*.d.ts",
-			"import": "./dist/resources/*.js",
-			"default": "./dist/resources/*.js"
+			"types": "./dist/types/resources/*.d.ts",
+			"import": "./dist/esm/resources/*.js",
+			"require": "./dist/cjs/resources/*.js",
+			"default": "./dist/cjs/resources/*.js"
 		}
 	}
 }
